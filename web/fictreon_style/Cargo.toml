@@ -1,13 +1,10 @@
 [package]
-name = "fic_main"
+name = "fictreon_style"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [dependencies]
-axum = { workspace = true }
-tokio = { workspace = true }
 chain_ui_core = { workspace = true }
 chain_ui_style = { workspace = true }
 
-fictreon_style = { workspace = true }
