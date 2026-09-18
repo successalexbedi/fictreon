@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Search</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-deep: #8B0A1F;
+      --accent-bright: #E63946;
+      --gold: #F4B942;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+      --content-px: 48px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main); font-weight: 700; font-size: 20px;
+      letter-spacing: 3px; cursor: pointer;
+    }
+    .logo span { color: var(--accent); }
+
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      position: relative; transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 60%; border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0); transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main); background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 14px; cursor: pointer; text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      text-align: center; width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ========== MOBILE HEADER ========== */
+    .mobile-header {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between; align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; color: var(--text-main);
+      font-size: 16px; cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 950;
+    }
+
+    /* ========== MOBILE BOTTOM NAV ========== */
+    .mobile-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around; align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 10px; gap: 4px;
+      flex: 1; height: 100%;
+      position: relative; transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: ''; position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* ========== MAIN WRAPPER ========== */
+    .main-content-wrapper {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 var(--content-px);
+      max-width: 100%; width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ========== SEARCH BAR ========== */
+    .search-container {
+      padding: 48px 0 24px;
+      animation: heroEnter 0.8s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .search-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .search-icon {
+      position: absolute;
+      left: 24px;
+      color: var(--text-muted);
+      font-size: 20px;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 18px 24px 18px 60px;
+      font-size: 16px;
+      color: var(--text-main);
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus {
+      border-color: rgba(200, 16, 46, 0.6);
+      box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.15);
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-main);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: none;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    .search-clear-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .search-clear-btn.visible { display: flex; }
+
+    /* ========== DISCOVER VIEW ========== */
+    #discoverView { padding-bottom: 80px; }
+    
+    .discover-section { margin-bottom: 48px; }
+    .discover-section-title {
+      font-size: 16px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px; color: var(--text-main);
+    }
+    .discover-section-title i { color: var(--accent); font-size: 14px; }
+
+    /* Trending Chips */
+    .trending-chips {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chip:hover {
+      background: rgba(200, 16, 46, 0.12);
+      border-color: rgba(200, 16, 46, 0.4);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+    .chip i { font-size: 11px; color: var(--accent-bright); }
+
+    /* Categories Grid */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .category-card {
+      position: relative;
+      height: 100px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      background: #000;
+      border: 1px solid var(--border-subtle);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .category-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(200, 16, 46, 0.5);
+    }
+    .category-card img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.4);
+      transition: transform 0.5s, filter 0.3s;
+    }
+    .category-card:hover img {
+      transform: scale(1.08);
+      filter: brightness(0.6);
+    }
+    .category-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 70%);
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px;
+    }
+    .category-card-name {
+      font-size: 14px; font-weight: 700; color: #fff;
+      position: relative; z-index: 1;
+    }
+    .category-card-count {
+      font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 500;
+    }
+
+    /* Recent Searches */
+    .recent-list {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .recent-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .recent-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-active);
+    }
+    .recent-item-left {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-muted); font-size: 13px;
+    }
+    .recent-item-left i { font-size: 12px; }
+    .recent-item-remove {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 12px; padding: 4px;
+      transition: color 0.2s;
+    }
+    .recent-item-remove:hover { color: var(--accent-bright); }
+
+    /* ========== RESULTS VIEW ========== */
+    #resultsView { display: none; padding-bottom: 80px; }
+    #resultsView.active { display: block; }
+    #discoverView.hidden { display: none; }
+
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 16px;
+    }
+    .results-query {
+      font-size: 20px; font-weight: 600; color: var(--text-main);
+    }
+    .results-query span { color: var(--accent-bright); }
+
+    .filter-tabs {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding-bottom: 4px; scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px; font-weight: 600;
+      padding: 8px 18px; border-radius: 999px;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .filter-tab:hover { color: var(--text-main); border-color: var(--border-active); }
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Results Grid (Reusing square-card from previous pages) */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 24px 16px;
+    }
+    .square-card {
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: flex; flex-direction: column; gap: 10px;
+      cursor: pointer; text-align: left;
+      font-family: inherit; color: inherit;
+      transition: transform 0.3s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .square-img-box {
+      width: 100%; aspect-ratio: 1 / 1;
+      border-radius: var(--radius-md);
+      overflow: hidden; background: #000;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      transition: border-color 0.25s, box-shadow 0.35s ease;
+    }
+    .square-img-box img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.85);
+      transition: filter 0.25s, transform 0.6s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .square-card:hover { transform: translateY(-6px); }
+    .square-card:hover .square-img-box {
+      border-color: rgba(200, 16, 46, 0.55);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(200, 16, 46, 0.22);
+    }
+    .square-card:hover .square-img-box img {
+      filter: brightness(1); transform: scale(1.07);
+    }
+    .square-title {
+      font-size: 13px; font-weight: 600; color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .square-meta {
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 80px 20px; text-align: center;
+    }
+    .empty-state.visible { display: flex; }
+    .empty-state i {
+      font-size: 48px; color: var(--border-active); margin-bottom: 16px;
+    }
+    .empty-state h3 {
+      font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 8px;
+    }
+    .empty-state p {
+      font-size: 13px; color: var(--text-muted); max-width: 300px;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      :root { --content-px: 20px; }
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+      .search-container { padding: 32px 0 20px; }
+      .search-input { padding: 14px 20px 14px 50px; font-size: 14px; }
+      .search-icon { left: 18px; font-size: 16px; }
+      .search-clear-btn { right: 14px; width: 24px; height: 24px; font-size: 10px; }
+      
+      .results-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .categories-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .category-card { height: 80px; }
+      .category-card-name { font-size: 12px; }
+      .category-card-count { font-size: 9px; }
+      .chip { padding: 8px 14px; font-size: 12px; }
+      .results-grid { grid-template-columns: repeat(2, 1fr); gap: 12px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-feather-pointed"></i> Authors</a>
+          <a href="#" class="active"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+          <a href="#"><i class="fa-solid fa-chart-line"></i> Box Office</a>
+          <a href="#"><i class="fa-solid fa-trophy"></i> Awards</a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> My Library</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <!-- SEARCH BAR -->
+        <div class="search-container">
+          <div class="search-bar-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search for books, authors, or series...">
+            <button class="search-clear-btn" id="clearSearch"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- DISCOVER VIEW (Default) -->
+        <div id="discoverView">
+          
+          <!-- Trending Searches -->
+          <div class="discover-section">
+            <h2 class="discover-section-title"><i class="fa-solid fa-fire"></i> Trending Searches</h2>
+            <div class="trending-chips">
+              <div class="chip" onclick="performSearch('The Ashen Crown')"><i class="fa-solid fa-arrow-trend-up"></i> The Ashen Crown</div>
+              <div class="chip" onclick="performSearch('Project Hail Mary')"><i class="fa-solid fa-arrow-trend-up"></i> Project Hail Mary</div>
+              <div class="chip" onclick="performSearch('Alex Bedi')"><i class="fa-solid fa-arrow-trend-up"></i> Alex Bedi</div>
+              <div class="chip" onclick="performSearch('Dune')"><i class="fa-solid fa-arrow-trend-up"></i> Dune</div>
+              <div class="chip" onclick="performSearch('The Midnight Library')"><i class="fa-solid fa-arrow-trend-up"></i> The Midnight Library</div>
+              <div class="chip" onclick="performSearch('Fantasy')"><i class="fa-solid fa-arrow-trend-up"></i> Fantasy</div>
+              <div class="chip" onclick="performSearch('Sci-Fi')"><i class="fa-solid fa-arrow-trend-up"></i> Sci-Fi</div>
+              <div class="chip" onclick="performSearch('The Last Saint')"><i class="fa-solid fa-arrow-trend-up"></i> The Last Saint</div>
+            </div>
+          </div>
+
+          <!-- Browse Categories -->
+          <div class="discover-section">
+            <h2 class="discover-section-title"><i class="fa-solid fa-layer-group"></i> Browse Categories</h2>
+            <div class="categories-grid">
+              <div class="category-card" onclick="performSearch('Fantasy')">
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" alt="Fantasy">
+                <div class="category-card-overlay">
+                  <span class="category-card-name">Fantasy</span>
+                  <span class="category-card-count">2,841 books</span>
+                </div>
+              </div>
+              <div class="category-card" onclick="performSearch('Sci-Fi')">
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="Sci-Fi">
+                <div class="category-card-overlay">
+                  <span class="category-card-name">Sci-Fi</span>
+                  <span class="category-card-count">1,920 books</span>
+                </div>
+              </div>
+              <div class="category-card" onclick="performSearch('Romance')">
+                <img src="https://images.unsplash.com/photo-1518100035221-528b182f427d?q=80&w=400&auto=format&fit=crop" alt="Romance">
+                <div class="category-card-overlay">
+                  <span class="category-card-name">Romance</span>
+                  <span class="category-card-count">3,104 books</span>
+                </div>
+              </div>
+              <div class="category-card" onclick="performSearch('Thriller')">
+                <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop" alt="Thriller">
+                <div class="category-card-overlay">
+                  <span class="category-card-name">Thriller</span>
+                  <span class="category-card-count">1,540 books</span>
+                </div>
+              </div>
+              <div class="category-card" onclick="performSearch('Historical')">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="Historical">
+                <div class="category-card-overlay">
+                  <span class="category-card-name">Historical</span>
+                  <span class="category-card-count">890 books</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Searches -->
+          <div class="discover-section">
+            <h2 class="discover-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Searches</h2>
+            <div class="recent-list">
+              <div class="recent-item">
+                <div class="recent-item-left">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>The Ashen Crown</span>
+                </div>
+                <button class="recent-item-remove"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="recent-item">
+                <div class="recent-item-left">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Alex Bedi</span>
+                </div>
+                <button class="recent-item-remove"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="recent-item">
+                <div class="recent-item-left">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Dune</span>
+                </div>
+                <button class="recent-item-remove"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            </div>
+          </div>
+
+        </div> <!-- END DISCOVER VIEW -->
+
+        <!-- RESULTS VIEW -->
+        <div id="resultsView">
+          
+          <div class="results-header">
+            <div class="results-query">Results for "<span id="queryText">Book</span>"</div>
+            <div class="filter-tabs">
+              <button class="filter-tab active">All</button>
+              <button class="filter-tab">Books</button>
+              <button class="filter-tab">Authors</button>
+              <button class="filter-tab">Series</button>
+            </div>
+          </div>
+
+          <div class="results-grid" id="resultsGrid">
+            <!-- Results will be injected here via JS -->
+          </div>
+
+          <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h3>No results found</h3>
+            <p>We couldn't find anything matching your search. Try different keywords or check for spelling errors.</p>
+          </div>
+
+        </div> <!-- END RESULTS VIEW -->
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Search</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+  </nav>
+
+  <script>
+    /* MOCK DATA */
+    const mockData = [
+      { title: "The Ashen Crown", author: "Alex Bedi", type: "Book", img: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" },
+      { title: "Project Hail Mary", author: "Andy Weir", type: "Book", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" },
+      { title: "Blood of Kings", author: "Sera Voss", type: "Book", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" },
+      { title: "The Last Saint", author: "N. K. Reyes", type: "Book", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
+      { title: "Dune", author: "Frank Herbert", type: "Book", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
+      { title: "The Midnight Library", author: "Matt Haig", type: "Book", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" },
+      { title: "The Song of Achilles", author: "Madeline Miller", type: "Book", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
+      { title: "Neuromancer", author: "William Gibson", type: "Book", img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400&auto=format&fit=crop" },
+      { title: "Alex Bedi", author: "@alexbedi", type: "Author", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" },
+      { title: "Madeline Miller", author: "@madeline", type: "Author", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" }
+    ];
+
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearch');
+    const discoverView = document.getElementById('discoverView');
+    const resultsView = document.getElementById('resultsView');
+    const resultsGrid = document.getElementById('resultsGrid');
+    const queryText = document.getElementById('queryText');
+    const emptyState = document.getElementById('emptyState');
+
+    /* SEARCH LOGIC */
+    function performSearch(query) {
+      if (!query.trim()) return;
+      
+      searchInput.value = query;
+      clearSearchBtn.classList.add('visible');
+      
+      // Switch views
+      discoverView.classList.add('hidden');
+      resultsView.classList.add('active');
+      
+      // Update query text
+      queryText.textContent = query;
+      
+      // Filter mock data
+      const filtered = mockData.filter(item => 
+        item.title.toLowerCase().includes(query.toLowerCase()) || 
+        item.author.toLowerCase().includes(query.toLowerCase())
+      );
+
+      // Render results
+      if (filtered.length > 0) {
+        emptyState.classList.remove('visible');
+        resultsGrid.innerHTML = filtered.map(item => `
+          <button class="square-card" onclick="alert('Opening ${item.title}')">
+            <div class="square-img-box">
+              <img src="${item.img}" alt="${item.title}">
+            </div>
+            <div>
+              <div class="square-title">${item.title}</div>
+              <div class="square-meta">${item.author}</div>
+            </div>
+          </button>
+        `).join('');
+      } else {
+        resultsGrid.innerHTML = '';
+        emptyState.classList.add('visible');
+      }
+    }
+
+    /* EVENT LISTENERS */
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        performSearch(e.target.value);
+      }
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearchBtn.classList.remove('visible');
+      discoverView.classList.remove('hidden');
+      resultsView.classList.remove('active');
+    });
+
+    // Show clear button when typing
+    searchInput.addEventListener('input', () => {
+      if (searchInput.value.length > 0) {
+        clearSearchBtn.classList.add('visible');
+      } else {
+        clearSearchBtn.classList.remove('visible');
+        // Optionally return to discover if empty
+        discoverView.classList.remove('hidden');
+        resultsView.classList.remove('active');
+      }
+    });
+
+    /* FILTER TABS */
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        // In a real app, this would re-filter the API call
+        performSearch(searchInput.value);
+      });
+    });
+
+    /* SIDEBAR */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html> 

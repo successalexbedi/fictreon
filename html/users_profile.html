@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - User Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+    }
+
+    /* Light Mode Overrides */
+    body.light-mode {
+      --bg-base: #f8f9fa;
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #e9ecef;
+      --border-subtle: rgba(0, 0, 0, 0.05);
+      --border-active: rgba(0, 0, 0, 0.1);
+      --text-main: #1a1a1a;
+      --text-muted: #6c757d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease, background-color 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main); font-weight: 700; font-size: 20px;
+      letter-spacing: 3px; cursor: pointer;
+    }
+    .logo span {
+      color: var(--accent); display: inline-block;
+      animation: logoPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { text-shadow: 0 0 0 rgba(200, 16, 46, 0); }
+      50%      { text-shadow: 0 0 20px rgba(200, 16, 46, 0.7); }
+    }
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      position: relative; transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 60%; border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0); transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(128, 128, 128, 0.1); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main); background-color: rgba(128, 128, 128, 0.1);
+      font-weight: 600;
+    }
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 14px; cursor: pointer; text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(128, 128, 128, 0.1); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      text-align: center; width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* MOBILE HEADER */
+    .mobile-header {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between; align-items: center;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(128, 128, 128, 0.1);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; color: var(--text-main);
+      font-size: 16px; cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .menu-toggle:hover { background: rgba(128, 128, 128, 0.2); border-color: var(--border-active); }
+    .sidebar-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 950;
+    }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around; align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 10px; gap: 4px;
+      flex: 1; height: 100%;
+      position: relative; transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: ''; position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* MAIN WRAPPER */
+    .main-content-wrapper {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+
+    /* PROFILE HEADER (HERO) */
+    .profile-header {
+      position: relative;
+      width: 100%;
+      background-color: var(--bg-surface);
+      padding: 0 48px 32px;
+      margin-bottom: 40px;
+    }
+    .profile-banner {
+      height: 240px;
+      width: calc(100% + 96px);
+      margin-left: -48px;
+      background: linear-gradient(135deg, #1b1c24 0%, #0b0c10 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    body.light-mode .profile-banner {
+      background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    }
+    .profile-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920&auto=format&fit=crop') center 30% / cover no-repeat;
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+    .profile-banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, var(--bg-base) 100%);
+      z-index: 2;
+    }
+    .profile-info-container {
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      margin-top: -60px;
+      position: relative;
+      z-index: 10;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid var(--bg-base);
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #000;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .profile-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .profile-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-bottom: 8px;
+    }
+    .profile-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .profile-handle {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .profile-bio {
+      font-size: 13px;
+      color: #b0b1b6;
+      max-width: 500px;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    body.light-mode .profile-bio { color: #495057; }
+    
+    .profile-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 16px;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+    }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+    .btn-edit-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: 50px;
+      background: var(--text-main);
+      color: var(--bg-base);
+      border: none;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      align-self: flex-end;
+      margin-bottom: 8px;
+    }
+    .btn-edit-profile:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* ===== STATS SECTION (Blended to main body) ===== */
+    .stats-section {
+      padding: 0 48px 80px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* The overlapping semi-transparent title style */
+    .section-main-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: rgba(128, 128, 128, 0.2);
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+      position: relative;
+      z-index: 1;
+      margin-top: 0;
+      text-transform: lowercase;
+    }
+    body.light-mode .section-main-title { color: rgba(0, 0, 0, 0.1); }
+
+    /* CAROUSEL TRACK (Top Authors & On Repeat) */
+    .carousel-track {
+      display: flex;
+      overflow-x: auto;
+      gap: 16px;
+      padding-bottom: 16px;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE */
+      margin-bottom: 48px;
+      padding-top: 10px;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+
+    /* TOP AUTHORS CARDS */
+    .author-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      min-width: 130px;
+      width: 130px;
+      flex-shrink: 0;
+    }
+    /* Oval aspect ratio to match image 2 */
+    .author-image-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      border-radius: 50% / 40%; 
+      overflow: hidden;
+      border: 1px solid rgba(128, 128, 128, 0.2);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .author-image-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.85);
+      transition: transform 0.3s, filter 0.3s;
+    }
+    .author-card:hover .author-image-wrap img {
+      transform: scale(1.05);
+      filter: brightness(1);
+    }
+    /* The white rank badges exactly like image 2 */
+    .rank-badge {
+      position: absolute;
+      bottom: -10px;
+      right: 8px;
+      background: #ffffff;
+      color: #000000;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 2;
+    }
+    .author-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    /* ON REPEAT CARDS */
+    .repeat-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+      width: 160px;
+      flex-shrink: 0;
+    }
+    .repeat-image-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(128, 128, 128, 0.2);
+      background: #000;
+    }
+    .repeat-image-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.8);
+      transition: transform 0.3s;
+    }
+    .repeat-card:hover .repeat-image-wrap img {
+      transform: scale(1.05);
+    }
+    /* Pill button exactly like image 2 */
+    .times-pill {
+      background: rgba(128, 128, 128, 0.15);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-main);
+      align-self: flex-start;
+      letter-spacing: 0.2px;
+      margin-top: 2px;
+    }
+    .repeat-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .repeat-author {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* SUMMARY STATS GRID */
+    .summary-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+      position: relative;
+      z-index: 1;
+    }
+    .summary-stat {
+      background: rgba(128, 128, 128, 0.05);
+      border-radius: 12px;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+    .summary-stat .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+      font-feature-settings: 'tnum';
+    }
+    .summary-stat .stat-desc {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    /* ===== SETTINGS SECTION ===== */
+    .settings-section {
+      padding: 0 48px 80px;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-right: 48px;
+      position: relative;
+    }
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.2px;
+      color: var(--text-main);
+    }
+    .section-title i {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: var(--radius-sm);
+    }
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    .setting-item:hover {
+      background: rgba(128, 128, 128, 0.05);
+      padding-left: 8px;
+      padding-right: 8px;
+      margin: 0 -8px;
+    }
+    .setting-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .setting-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(128, 128, 128, 0.1);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .setting-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .setting-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+    .setting-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .setting-chevron {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Toggle Switch CSS */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(128, 128, 128, 0.3);
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* CONNECT BUTTONS */
+    .btn-connect {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .btn-connect:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-connect.connected {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.5);
+      color: #22C55E;
+    }
+    .btn-connect.connected:hover {
+      background: rgba(34, 197, 94, 0.25);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+      .profile-header { padding: 0 20px 24px; }
+      .profile-banner { width: calc(100% + 40px); margin-left: -20px; }
+      .profile-info-container { flex-direction: column; align-items: flex-start; gap: 16px; margin-top: -40px; }
+      .profile-avatar { width: 96px; height: 96px; }
+      .profile-name { font-size: 24px; }
+      .btn-edit-profile { align-self: flex-start; margin-bottom: 0; width: 100%; justify-content: center; }
+      
+      .stats-section { padding: 0 20px 60px; }
+      .settings-section { padding: 0 20px 60px; }
+      
+      .author-card { min-width: 110px; width: 110px; }
+      .repeat-card { min-width: 140px; width: 140px; }
+      .summary-stats-grid { gap: 10px; }
+      .summary-stat { padding: 16px 8px; }
+      .summary-stat .stat-num { font-size: 20px; }
+      .summary-stat .stat-desc { font-size: 8px; }
+      
+      .section-header { padding-right: 0; }
+      .setting-item:hover { padding-left: 0; padding-right: 0; margin: 0; }
+    }
+
+    @media (max-width: 480px) {
+      .profile-banner { height: 180px; }
+      .profile-avatar { width: 80px; height: 80px; }
+      .profile-name { font-size: 20px; }
+      .profile-stats { gap: 20px; }
+      .stat-value { font-size: 15px; }
+      .stat-label { font-size: 9px; }
+      
+      .stats-section { padding: 0 16px 40px; }
+      .settings-section { padding: 0 16px 40px; }
+      .section-main-title { font-size: 20px; margin-bottom: 16px; }
+      
+      .author-card { min-width: 90px; width: 90px; }
+      .rank-badge { width: 20px; height: 20px; font-size: 10px; bottom: -6px; right: 2px; }
+      .author-name { font-size: 10px; }
+      
+      .repeat-card { min-width: 120px; width: 120px; }
+      .times-pill { font-size: 9px; padding: 3px 8px; }
+      .repeat-title { font-size: 11px; }
+      .repeat-author { font-size: 9px; }
+      
+      .summary-stats-grid { gap: 8px; }
+      .summary-stat .stat-num { font-size: 16px; }
+      .summary-stat .stat-desc { font-size: 7px; }
+      
+      .setting-icon { width: 30px; height: 30px; font-size: 14px; }
+      .setting-title { font-size: 13px; }
+      .setting-desc { font-size: 10px; }
+      .toggle-switch { width: 38px; height: 20px; }
+      .slider:before { height: 14px; width: 14px; left: 3px; bottom: 3px; }
+      input:checked + .slider:before { transform: translateX(18px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#" class="active"><i class="fa-solid fa-user"></i> Profile</a>
+          <a href="#"><i class="fa-solid fa-compass"></i> New &amp; Popular</a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> Collections</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log Out</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+
+      <!-- PROFILE HEADER (HERO) -->
+      <div class="profile-header">
+        <div class="profile-banner">
+          <div class="profile-banner-overlay"></div>
+        </div>
+        <div class="profile-info-container">
+          <div class="profile-avatar">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" alt="User Avatar">
+          </div>
+          <div class="profile-details">
+            <h1 class="profile-name">Elara Vane</h1>
+            <span class="profile-handle">@elaravane</span>
+            <p class="profile-bio">Fantasy enthusiast. Political intrigue apologist. Currently re-reading The Ashen Crown for the third time.</p>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-value">128</span>
+                <span class="stat-label">Following</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">4.2K</span>
+                <span class="stat-label">Followers</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">86</span>
+                <span class="stat-label">Reviews</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn-edit-profile" onclick="showToast('Edit profile feature coming soon')">
+            <i class="fa-solid fa-pen"></i> Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS SECTION (Blended to Body) -->
+      <div class="stats-section">
+        
+        <!-- TOP AUTHORS CAROUSEL -->
+        <h2 class="section-main-title">top authors</h2>
+        <div class="carousel-track">
+          <div class="author-card">
+            <div class="author-image-wrap">
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Alex Bedi">
+              <div class="rank-badge">1</div>
+            </div>
+            <div class="author-name">Alex Bedi</div>
+          </div>
+          <div class="author-card">
+            <div class="author-image-wrap">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" alt="Andy Weir">
+              <div class="rank-badge">2</div>
+            </div>
+            <div class="author-name">Andy Weir</div>
+          </div>
+          <div class="author-card">
+            <div class="author-image-wrap">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" alt="Madeline Miller">
+              <div class="rank-badge">3</div>
+            </div>
+            <div class="author-name">Madeline Miller</div>
+          </div>
+          <div class="author-card">
+            <div class="author-image-wrap">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" alt="N.K. Jemisin">
+              <div class="rank-badge">4</div>
+            </div>
+            <div class="author-name">N.K. Jemisin</div>
+          </div>
+          <div class="author-card">
+            <div class="author-image-wrap">
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Ursula K. Le Guin">
+              <div class="rank-badge">5</div>
+            </div>
+            <div class="author-name">Ursula K. Le Guin</div>
+          </div>
+        </div>
+
+        <!-- ON REPEAT CAROUSEL -->
+        <h2 class="section-main-title">on repeat</h2>
+        <div class="carousel-track">
+          <div class="repeat-card">
+            <div class="repeat-image-wrap">
+              <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+            </div>
+            <div class="times-pill">107 times</div>
+            <div class="repeat-title">The Ashen Crown</div>
+            <div class="repeat-author">Alex Bedi</div>
+          </div>
+          <div class="repeat-card">
+            <div class="repeat-image-wrap">
+              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="Project Hail Mary">
+            </div>
+            <div class="times-pill">34 times</div>
+            <div class="repeat-title">Project Hail Mary</div>
+            <div class="repeat-author">Andy Weir</div>
+          </div>
+          <div class="repeat-card">
+            <div class="repeat-image-wrap">
+              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" alt="The Song of Achilles">
+            </div>
+            <div class="times-pill">33 times</div>
+            <div class="repeat-title">The Song of Achilles</div>
+            <div class="repeat-author">Madeline Miller</div>
+          </div>
+          <div class="repeat-card">
+            <div class="repeat-image-wrap">
+              <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="The Midnight Library">
+            </div>
+            <div class="times-pill">28 times</div>
+            <div class="repeat-title">The Midnight Library</div>
+            <div class="repeat-author">Matt Haig</div>
+          </div>
+        </div>
+
+        <!-- SUMMARY STATS -->
+        <div class="summary-stats-grid">
+          <div class="summary-stat">
+            <span class="stat-num">2808</span>
+            <span class="stat-desc">min read</span>
+          </div>
+          <div class="summary-stat">
+            <span class="stat-num">8</span>
+            <span class="stat-desc">books finished</span>
+          </div>
+          <div class="summary-stat">
+            <span class="stat-num">893</span>
+            <span class="stat-desc">pages turned</span>
+          </div>
+        </div>
+
+      </div> <!-- END STATS SECTION -->
+
+      <!-- ===== CONNECT SECTION ===== -->
+      <div class="settings-section connect-section">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fa-solid fa-link"></i> Connect</h2>
+        </div>
+
+        <div class="settings-list">
+          
+          <!-- Stripe -->
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-brands fa-stripe"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Stripe</div>
+                <div class="setting-desc">Connect for payments and payouts</div>
+              </div>
+            </div>
+            <button class="btn-connect" onclick="toggleConnect(this, 'Stripe')">Connect</button>
+          </div>
+
+          <!-- PayPal -->
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-brands fa-paypal"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">PayPal</div>
+                <div class="setting-desc">Link your PayPal account for purchases</div>
+              </div>
+            </div>
+            <button class="btn-connect" onclick="toggleConnect(this, 'PayPal')">Connect</button>
+          </div>
+
+          <!-- Goodreads -->
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-brands fa-goodreads"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Goodreads</div>
+                <div class="setting-desc">Sync your reading progress and reviews</div>
+              </div>
+            </div>
+            <button class="btn-connect" onclick="toggleConnect(this, 'Goodreads')">Connect</button>
+          </div>
+
+          <!-- X (Twitter) -->
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-brands fa-x-twitter"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">X (Twitter)</div>
+                <div class="setting-desc">Share your favorite quotes to your feed</div>
+              </div>
+            </div>
+            <button class="btn-connect" onclick="toggleConnect(this, 'X')">Connect</button>
+          </div>
+
+        </div>
+      </div> <!-- END CONNECT SECTION -->
+
+      <!-- SETTINGS SECTION -->
+      <div class="settings-section">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fa-solid fa-gear"></i> Settings</h2>
+        </div>
+
+        <div class="settings-list">
+          
+          <div class="setting-item" onclick="document.getElementById('themeToggle').click()">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-solid fa-moon"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Dark Mode</div>
+                <div class="setting-desc">Switch between light and dark theme</div>
+              </div>
+            </div>
+            <label class="toggle-switch" onclick="event.stopPropagation()">
+              <input type="checkbox" id="themeToggle" checked onchange="toggleTheme()">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-solid fa-bell"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Notifications</div>
+                <div class="setting-desc">Get updates on new chapters and replies</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-solid fa-book-open"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Reading Preferences</div>
+                <div class="setting-desc">Font size, line height, and margins</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right setting-chevron"></i>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-solid fa-language"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Language</div>
+                <div class="setting-desc">English (US)</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right setting-chevron"></i>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-left">
+              <div class="setting-icon"><i class="fa-solid fa-lock"></i></div>
+              <div class="setting-text">
+                <div class="setting-title">Privacy & Security</div>
+                <div class="setting-desc">Manage your account security</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right setting-chevron"></i>
+          </div>
+
+        </div>
+      </div> <!-- END SETTINGS SECTION -->
+
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-user"></i>
+      <span>Profile</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+    }
+
+    /* SIDEBAR */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    /* THEME TOGGLE LOGIC */
+    function toggleTheme() {
+      const checkbox = document.getElementById('themeToggle');
+      if (checkbox.checked) {
+        document.body.classList.remove('light-mode');
+        showToast('Dark mode activated');
+      } else {
+        document.body.classList.add('light-mode');
+        showToast('Light mode activated');
+      }
+    }
+
+    /* CONNECT BUTTONS LOGIC */
+    function toggleConnect(btn, service) {
+      if (btn.classList.contains('connected')) {
+        btn.classList.remove('connected');
+        btn.innerHTML = 'Connect';
+        showToast('Disconnected from ' + service);
+      } else {
+        btn.classList.add('connected');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Connected';
+        showToast('Connected to ' + service);
+      }
+    }
+
+    /* SETTING ITEM CLICK HANDLERS (Placeholder) */
+    document.querySelectorAll('.setting-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        // Prevent triggering toast when clicking the toggle label or connect button
+        if (e.target.closest('.toggle-switch') || e.target.closest('.btn-connect')) return;
+        const title = item.querySelector('.setting-title')?.textContent || 'Setting';
+        showToast('Opening ' + title + '...');
+      });
+    });
+  </script>
+</body>
+</html>

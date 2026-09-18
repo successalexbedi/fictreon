@@ -1,0 +1,102 @@
+[workspace]
+members = [
+    "web/fic_auth",
+    "web/fic_main",
+    "web/fic_model",
+    "web/fic_readers",
+    "web/fic_routes",
+    "web/fic_writers",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+urlencoding = "2"
+
+# UI
+chain_ui_core = { git = "https://github.com/successalexbedi/chain_ui_rs" }
+chain_ui_unpoly = { git = "https://github.com/successalexbedi/chain_ui_rs" }
+chain_ui_macros = { git = "https://github.com/successalexbedi/chain_ui_rs" }
+
+
+# WEB
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = [
+    "fs",
+    "trace",
+    "compression-gzip",
+    "compression-br",
+    "cors",
+] }
+
+http = "1"
+http-body-util = "0.1"
+
+
+# SERIALIZATION
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+
+# DATABASE
+sqlx = { version = "0.7", features = [
+    "sqlite",
+    "runtime-tokio",
+    "macros",
+    "chrono",
+    "uuid",
+] }
+
+
+# AUTHENTICATION / SECURITY
+bcrypt = "0.15"
+uuid = { version = "1", features = [
+    "v4",
+    "serde",
+] }
+
+
+# Dates / Time
+chrono = { version = "0.4", features = [
+    "serde",
+] }
+
+# CONFIGURATION
+dotenvy = "0.15"
+
+# LOGGING / TRACING
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "fmt",
+] }
+
+# COOKIES / HTTP SESSIONS
+cookie = "0.18"
+
+# FORMS / URL ENCODING
+form_urlencoded = "1"
+
+# ERRORS
+thiserror = "1"
+anyhow = "1"
+
+# ASYNC UTILITIES
+futures = "0.3"
+
+# STATIC ASSETS / MIME DETECTION
+mime_guess = "2"
+
+#  INTERNAL CRATES
+fic_core_models = { path = "web/fic_core_models" }
+fic_core = { path = "web/fic_core" }
+fic_auth = { path = "web/fic_auth" }
+fic_readers = { path = "web/fic_readers" }
+fic_writers = { path = "web/fic_writers" }
+fic_routes = { path = "web/fic_routes" }

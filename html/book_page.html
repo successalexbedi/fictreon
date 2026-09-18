@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - The Ashen Crown</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-deep: #8B0A1F;
+      --accent-bright: #E63946;
+      --up: #22C55E;
+      --gold: #F4B942;
+      --tier-hate: #DC2626;
+      --tier-dislike: #EA580C;
+      --tier-neutral: #EAB308;
+      --tier-like: #84CC16;
+      --tier-love: #22C55E;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main); font-weight: 700; font-size: 20px;
+      letter-spacing: 3px; cursor: pointer;
+    }
+    .logo span {
+      color: var(--accent);
+      display: inline-block;
+      animation: logoPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { text-shadow: 0 0 0 rgba(200, 16, 46, 0); }
+      50%      { text-shadow: 0 0 20px rgba(200, 16, 46, 0.7); }
+    }
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      position: relative; transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 60%; border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0); transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main); background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 14px; cursor: pointer; text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      text-align: center; width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* MOBILE HEADER */
+    .mobile-header {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between; align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; color: var(--text-main);
+      font-size: 16px; cursor: pointer;
+    }
+    .menu-toggle:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-active); }
+    .sidebar-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 950;
+    }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around; align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 10px; gap: 4px;
+      flex: 1; height: 100%;
+      position: relative; transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: ''; position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* MAIN */
+    .main-content-wrapper {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 48px 60px;
+      max-width: 100%; width: 100%; margin: 0 auto;
+    }
+
+    /* BACK LINK */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 12px; font-weight: 500;
+      padding: 24px 0 14px;
+      transition: color 0.2s;
+      background: none; border: none;
+      cursor: pointer; font-family: inherit;
+      position: relative; z-index: 10;
+    }
+    .back-link:hover { color: var(--text-main); }
+    .back-link i { font-size: 11px; transition: transform 0.2s; }
+    .back-link:hover i { transform: translateX(-3px); }
+
+    /* =========================================================
+       HERO — unchanged
+       ========================================================= */
+    .hero-container {
+      position: relative;
+      width: 100%;
+      height: 42vh;
+      min-height: 340px;
+      max-height: 440px;
+      background-color: var(--bg-base);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px 48px;
+      margin-left: -48px;
+      margin-right: -48px;
+      width: calc(100% + 96px);
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-position: center 30%;
+      background-size: cover;
+      background-repeat: no-repeat;
+      opacity: 0;
+      z-index: 0;
+      will-change: opacity, transform;
+      transform: scale(1.04);
+      transition: opacity 0.9s ease-in-out, transform 1.4s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .hero-bg.active { opacity: 1; transform: scale(1); }
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background:
+        linear-gradient(to right, rgba(11, 12, 16, 0.97) 0%, rgba(11, 12, 16, 0.85) 45%, rgba(11, 12, 16, 0.25) 100%),
+        linear-gradient(to bottom, rgba(11, 12, 16, 0.35) 0%, rgba(11, 12, 16, 0.85) 78%, var(--bg-base) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hero-content-box {
+      position: relative;
+      z-index: 10;
+      max-width: 620px;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .hero-content-box.is-switching {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .studio-tag {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .red-bar {
+      width: 3px; height: 11px;
+      background-color: var(--accent);
+      border-radius: 1px;
+      animation: redBarPulse 2.6s ease-in-out infinite;
+    }
+    @keyframes redBarPulse {
+      0%, 100% { opacity: 0.7; transform: scaleY(1); }
+      50%      { opacity: 1;   transform: scaleY(1.25); }
+    }
+    .movie-title {
+      font-size: 34px; font-weight: 700;
+      line-height: 1.08; margin-bottom: 10px;
+      letter-spacing: -0.8px;
+    }
+    .meta-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11.5px; color: var(--text-muted);
+      margin-bottom: 10px;
+      overflow-x: auto; scrollbar-width: none;
+      white-space: nowrap; padding-bottom: 2px;
+    }
+    .meta-row::-webkit-scrollbar { display: none; }
+    .meta-item {
+      display: inline-flex; align-items: center;
+      gap: 4px; flex-shrink: 0;
+    }
+    .meta-item .star { color: var(--gold); }
+    .meta-item strong {
+      color: var(--text-main); font-weight: 700;
+      font-feature-settings: 'tnum';
+    }
+    .meta-dot { color: var(--text-muted); opacity: 0.5; flex-shrink: 0; }
+    .description {
+      font-size: 12.5px; line-height: 1.5;
+      color: #b0b1b6; margin-bottom: 14px;
+      max-width: 560px;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .cta-buttons {
+      display: flex; gap: 8px;
+      flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .btn-primary {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px 22px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: opacity 0.2s, transform 0.15s; font-family: inherit;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute;
+      top: 0; left: -120%; width: 55%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+      transition: left 0.7s ease; pointer-events: none;
+    }
+    .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-primary:hover::before { left: 140%; }
+    .btn-primary i { font-size: 11px; }
+    .btn-ghost {
+      background: rgba(11, 12, 16, 0.55); color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 18px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 500; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      font-family: inherit;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-ghost:hover {
+      background: rgba(20, 21, 26, 0.75);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+    .btn-ghost i { font-size: 11px; }
+    .btn-icon {
+      width: 38px; height: 38px; border-radius: 999px;
+      background: rgba(11, 12, 16, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .btn-icon:hover {
+      background: rgba(20, 21, 26, 0.75);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .btn-icon i { font-size: 13px; }
+    .hero-switcher { margin-top: 4px; }
+    .switcher-title {
+      font-size: 9.5px; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted);
+      margin-bottom: 6px; font-weight: 600;
+    }
+    .thumbnails-container {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding-bottom: 2px; scrollbar-width: none;
+    }
+    .thumbnails-container::-webkit-scrollbar { display: none; }
+    .thumb-card {
+      position: relative; width: 78px; height: 52px;
+      border-radius: var(--radius-sm); overflow: hidden;
+      cursor: pointer; flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      touch-action: manipulation;
+      transition: border-color 0.45s ease, transform 0.25s ease, box-shadow 0.45s ease;
+    }
+    .thumb-card img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.7);
+      transition: filter 0.45s ease, transform 0.5s ease;
+    }
+    .thumb-card .card-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 2px 4px; background: rgba(11, 12, 16, 0.85);
+      font-size: 8px; font-weight: 500; color: var(--text-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: color 0.4s ease;
+    }
+    .thumb-card.active {
+      border-color: rgba(200, 16, 46, 0.65);
+      box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.4), 0 0 10px rgba(200, 16, 46, 0.25);
+    }
+    .thumb-card.active img { filter: brightness(1); }
+    .thumb-card.active .card-info { color: var(--text-main); }
+    @media (hover: hover) and (pointer: fine) {
+      .thumb-card:hover { transform: translateY(-2px); }
+      .thumb-card:hover img { filter: brightness(1); transform: scale(1.06); }
+    }
+
+    /* =========================================================
+       PAGE BODY — no borders, space and hierarchy only
+       ========================================================= */
+    .page-body-wrapper {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      background-color: var(--bg-base);
+      padding-top: 32px;
+    }
+
+    /* TABS — no container border, active gets subtle pill */
+    .tabs-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 40px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      border-radius: 999px;
+      transition: all 0.2s ease;
+      text-align: center;
+      letter-spacing: 0.1px;
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .tab-btn.active {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* SECTIONS */
+    .section-block { margin-bottom: 56px; }
+    .section-block[hidden] { display: none; }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 22px;
+      gap: 16px;
+      flex-wrap: nowrap;
+    }
+    .section-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+    }
+    .section-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title i {
+      color: var(--accent);
+      font-size: 14px;
+      opacity: 0.85;
+    }
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0.1px;
+    }
+    .section-action {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.2s;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 0;
+    }
+    .section-action:hover { color: var(--text-main); }
+    .section-action i { font-size: 10px; }
+
+    /* ABOUT */
+    .about-text {
+      font-size: 14px;
+      line-height: 1.75;
+      color: #c4c5ca;
+      max-width: 720px;
+      margin-bottom: 40px;
+    }
+    .about-text p + p { margin-top: 14px; }
+
+    /* QUOTE — no borders, editorial style */
+    .quote-block {
+      padding: 0;
+      max-width: 720px;
+      margin-bottom: 48px;
+      position: relative;
+    }
+    .quote-block i {
+      font-size: 26px;
+      color: var(--accent);
+      opacity: 0.85;
+      display: block;
+      margin-bottom: 18px;
+    }
+    .quote-block p {
+      font-size: 19px;
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+      font-weight: 400;
+    }
+    .quote-block cite {
+      font-size: 12px;
+      font-style: normal;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.2px;
+    }
+    .quote-block cite::before {
+      content: '';
+      width: 22px;
+      height: 1px;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    /* INFO — label/value grid, no borders */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px 36px;
+      margin-top: 8px;
+    }
+    .info-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .info-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.1px;
+      line-height: 1.3;
+    }
+    .info-value small {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-left: 2px;
+    }
+
+    /* STATS — no borders, pure spacing */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+    .stat-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.8px;
+      font-feature-settings: 'tnum';
+      line-height: 1;
+    }
+    .stat-value small {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* CHAPTER RATINGS */
+    .chapter-rating-legend {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .chapter-rating-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .chapter-pill {
+      width: 74px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+      transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .chapter-pill-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-feature-settings: 'tnum';
+    }
+    .chapter-pill-score {
+      width: 100%;
+      padding: 9px 4px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.2px;
+      text-align: center;
+      color: #fff;
+      transition: filter 0.2s;
+    }
+    .chapter-pill-score.tier-hate { background: var(--tier-hate); }
+    .chapter-pill-score.tier-dislike { background: var(--tier-dislike); }
+    .chapter-pill-score.tier-neutral { background: var(--tier-neutral); color: #1a1204; }
+    .chapter-pill-score.tier-like { background: var(--tier-like); color: #16200a; }
+    .chapter-pill-score.tier-love { background: var(--tier-love); }
+    @media (hover: hover) and (pointer: fine) {
+      .chapter-pill:hover { transform: translateY(-2px); }
+      .chapter-pill:hover .chapter-pill-score { filter: brightness(1.12); }
+    }
+    .chapter-pill:active { transform: translateY(0) scale(0.97); }
+    .chapter-rating-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 500;
+    }
+    .chapter-rating-note i { font-size: 10px; }
+
+    /* AWARDS — icon + text, no row borders */
+    .awards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      margin-top: 4px;
+    }
+    .award-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0;
+    }
+    .award-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(244, 185, 66, 0.1);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .award-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .award-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.1px;
+    }
+    .award-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* =========================================================
+       REVIEWS — redesigned, no borders
+       ========================================================= */
+    .reviews-summary {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .reviews-score-block {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .reviews-score-big {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      color: var(--text-main);
+      line-height: 1;
+      font-feature-settings: 'tnum';
+    }
+    .reviews-score-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .reviews-score-stars {
+      display: flex;
+      gap: 2px;
+      font-size: 12px;
+      color: var(--gold);
+    }
+    .reviews-score-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .reviews-filter {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .filter-pill:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.03); }
+    .filter-pill.active {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .review-card {
+      padding: 22px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.015);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: background 0.2s;
+    }
+    .review-card:hover {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .review-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .review-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #1a1b22;
+    }
+    .review-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .review-user {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      flex: 1;
+    }
+    .review-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .review-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.1px;
+    }
+    .review-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--up);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .review-verified i { font-size: 8px; }
+    .review-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.1px;
+    }
+    .review-rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+      flex-shrink: 0;
+    }
+    .review-rating-badge i {
+      font-size: 11px;
+      color: var(--gold);
+    }
+
+    .review-text {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #c4c5ca;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .review-foot {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 2px;
+    }
+    .review-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .review-action:hover { color: var(--text-main); }
+    .review-action i { font-size: 12px; }
+    .review-action.liked { color: var(--accent-bright); }
+
+    /* Carousel + square cards — kept same as homepage */
+    .carousel-track {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+    }
+    .carousel-track::-webkit-scrollbar { height: 3px; }
+    .carousel-track::-webkit-scrollbar-track { background: transparent; }
+    .carousel-track::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+    }
+    .square-card {
+      background: transparent; border: none; padding: 0;
+      display: flex; flex-direction: column; gap: 9px;
+      cursor: pointer;
+      min-width: 170px; width: 170px;
+      flex-shrink: 0; touch-action: manipulation;
+      transition: transform 0.32s cubic-bezier(0.22, 0.7, 0.4, 1);
+      text-align: left; font-family: inherit; color: inherit;
+    }
+    .square-img-box {
+      width: 170px; height: 170px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+    .square-img-box img {
+      width: 100%; height: 100%; object-fit: cover;
+      filter: brightness(0.9);
+      transition: filter 0.25s, transform 0.6s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .square-title {
+      font-size: 12.5px; font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; width: 100%;
+    }
+    .square-meta {
+      font-size: 10.5px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 4px;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chapter-card-box {
+      width: 170px;
+      height: 170px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      transition: box-shadow 0.3s ease;
+    }
+    .chapter-card-box img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: brightness(0.35) saturate(0.8) blur(1px);
+      transition: filter 0.25s, transform 0.6s;
+    }
+    .chapter-card-num {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 58px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -3px;
+      font-feature-settings: 'tnum';
+      text-shadow: 0 4px 24px rgba(0,0,0,0.9);
+      line-height: 1;
+      z-index: 2;
+    }
+    .chapter-card-status {
+      position: absolute;
+      top: 10px; left: 10px;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      z-index: 3;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .chapter-card-status.free {
+      background: rgba(34, 197, 94, 0.92);
+      color: #fff;
+    }
+    .chapter-card-status.locked {
+      background: rgba(11, 12, 16, 0.9);
+      color: var(--text-muted);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .square-card:hover { transform: translateY(-5px); }
+      .square-card:hover .square-img-box,
+      .square-card:hover .chapter-card-box {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+      }
+      .square-card:hover .square-img-box img {
+        filter: brightness(1);
+        transform: scale(1.07);
+      }
+      .square-card:hover .chapter-card-box img {
+        filter: brightness(0.55) saturate(1) blur(0);
+        transform: scale(1.05);
+      }
+    }
+    .square-card:active { transform: translateY(-3px) scale(0.985); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid rgba(200, 16, 46, 0.38);
+      color: var(--text-main);
+      font-size: 12px; font-weight: 500;
+      padding: 10px 20px; border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      z-index: 2000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 24px rgba(200, 16, 46, 0.28);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Scroll reveal */
+    body.reveal-ready .section-block:not(.in-view) {
+      opacity: 0; transform: translateY(20px);
+    }
+    body.reveal-ready .section-block {
+      transition: opacity 0.65s ease, transform 0.7s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    body.reveal-ready .section-block.in-view {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+      .content-inner { padding: 0 20px 50px; }
+      .hero-container {
+        height: 50vh;
+        min-height: 380px;
+        max-height: 460px;
+        padding: 24px 20px 20px;
+        margin-left: -20px;
+        margin-right: -20px;
+        width: calc(100% + 40px);
+      }
+      .movie-title { font-size: 28px; letter-spacing: -0.5px; }
+      .hero-switcher { display: none; }
+
+      .reviews-grid { grid-template-columns: 1fr; }
+      .reviews-summary { gap: 20px; }
+      .reviews-filter { margin-left: 0; }
+
+      .carousel-track::-webkit-scrollbar { display: none; }
+      .carousel-track { scrollbar-width: none; }
+      .toast { bottom: 78px; }
+    }
+
+    @media (max-width: 640px) {
+      .back-link { padding: 18px 0 12px; }
+      .hero-container {
+        height: 58vh;
+        min-height: 420px;
+        padding: 20px 20px 18px;
+      }
+      .movie-title { font-size: 24px; letter-spacing: -0.4px; margin-bottom: 8px; }
+      .studio-tag { font-size: 10.5px; margin-bottom: 6px; }
+      .meta-row { gap: 7px; font-size: 11px; margin-bottom: 10px; }
+      .description { font-size: 12px; margin-bottom: 14px; line-height: 1.5; }
+
+      .cta-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+      .btn-primary, .btn-ghost, .btn-icon {
+        width: 100%; height: 40px;
+        min-width: 0; padding: 0;
+        border-radius: 999px;
+        justify-content: center;
+        gap: 0;
+      }
+      .btn-primary .btn-text,
+      .btn-ghost .btn-text { display: none; }
+      .btn-primary i, .btn-ghost i, .btn-icon i { font-size: 13px; }
+
+      .page-body-wrapper { padding-top: 24px; }
+      .tabs-row { margin-bottom: 32px; gap: 4px; }
+      .tab-btn { padding: 10px 8px; font-size: 12px; }
+      .section-block { margin-bottom: 44px; }
+
+      .section-title { font-size: 17px; letter-spacing: -0.3px; }
+      .section-title i { font-size: 13px; }
+      .section-subtitle { font-size: 11.5px; }
+      .section-header { margin-bottom: 18px; }
+
+      .about-text { font-size: 13px; line-height: 1.7; margin-bottom: 32px; }
+      .quote-block { margin-bottom: 36px; }
+      .quote-block i { font-size: 22px; margin-bottom: 14px; }
+      .quote-block p { font-size: 16px; margin-bottom: 14px; }
+      .quote-block cite { font-size: 11.5px; }
+
+      .info-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 24px; }
+      .info-value { font-size: 13px; }
+      .info-label { font-size: 9.5px; }
+
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        margin-bottom: 36px;
+      }
+      .stat-value { font-size: 22px; letter-spacing: -0.5px; }
+      .stat-label { font-size: 9.5px; }
+
+      .chapter-rating-legend { gap: 12px; font-size: 10px; margin-bottom: 14px; }
+      .legend-dot { width: 7px; height: 7px; }
+      .chapter-rating-grid { gap: 6px; }
+      .chapter-pill { width: 62px; }
+      .chapter-pill-label { font-size: 9px; }
+      .chapter-pill-score { font-size: 11.5px; padding: 7px 3px; }
+      .chapter-rating-note { font-size: 10px; }
+
+      .awards-list { gap: 18px; }
+      .award-icon { width: 38px; height: 38px; font-size: 14px; }
+      .award-name { font-size: 13px; }
+      .award-detail { font-size: 11px; }
+
+      .reviews-summary { gap: 16px; margin-bottom: 24px; }
+      .reviews-score-big { font-size: 40px; }
+      .reviews-score-count { font-size: 11.5px; }
+      .reviews-filter { gap: 6px; width: 100%; }
+      .filter-pill { padding: 6px 12px; font-size: 11.5px; }
+
+      .review-card { padding: 18px; border-radius: 14px; }
+      .review-avatar { width: 36px; height: 36px; }
+      .review-name { font-size: 12.5px; }
+      .review-text { font-size: 12.5px; -webkit-line-clamp: 5; }
+
+      .square-card { min-width: 148px; width: 148px; gap: 8px; }
+      .square-img-box,
+      .chapter-card-box { width: 148px; height: 148px; }
+      .chapter-card-num { font-size: 50px; letter-spacing: -2px; }
+      .square-title { font-size: 12px; }
+      .square-meta { font-size: 10px; }
+    }
+
+    @media (max-width: 380px) {
+      .movie-title { font-size: 22px; }
+      .chapter-pill { width: 56px; }
+      .square-card { min-width: 130px; width: 130px; }
+      .square-img-box,
+      .chapter-card-box { width: 130px; height: 130px; }
+      .chapter-card-num { font-size: 42px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#" class="active"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-layer-group"></i> Series</a>
+          <a href="#"><i class="fa-solid fa-compass"></i> New &amp; Popular</a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> Collections</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+        <button class="back-link" id="backLink">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back to Books
+        </button>
+      </div>
+
+      <!-- HERO -->
+      <div class="hero-container" id="heroContainer">
+        <div class="hero-bg active" id="heroBgA" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920&auto=format&fit=crop');"></div>
+        <div class="hero-bg" id="heroBgB"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="content-inner">
+          <div class="hero-content-box" id="heroContentBox">
+
+            <div class="studio-tag">
+              <span class="red-bar"></span>
+              <span id="heroTag">Alex Bedi</span>
+            </div>
+
+            <h1 class="movie-title" id="heroTitle">The Ashen Crown</h1>
+
+            <div class="meta-row">
+              <span class="meta-item">
+                <i class="fa-solid fa-star star"></i>
+                <strong>4.8</strong>
+              </span>
+              <span class="meta-dot">·</span>
+              <span class="meta-item"><strong>612</strong>&nbsp;pages</span>
+              <span class="meta-dot">·</span>
+              <span class="meta-item"><strong>2h 14m</strong></span>
+              <span class="meta-dot">·</span>
+              <span class="meta-item"><strong>84,291</strong>&nbsp;sold</span>
+              <span class="meta-dot">·</span>
+              <span class="meta-item"><strong>2025</strong></span>
+            </div>
+
+            <p class="description" id="heroDesc">
+              When the last emperor falls, a bastard princess must claim a throne that was never hers — while an ancient order of ash-priests hunts the only bloodline that can end their reign forever.
+            </p>
+
+            <div class="cta-buttons">
+              <button class="btn-primary" id="readBtn">
+                <i class="fa-solid fa-play"></i>
+                <span class="btn-text">Read Now</span>
+              </button>
+              <button class="btn-ghost" id="saveBtn">
+                <i class="fa-regular fa-bookmark"></i>
+                <span class="btn-text">Save</span>
+              </button>
+              <button class="btn-icon" aria-label="Share" id="shareBtn">
+                <i class="fa-solid fa-share-nodes"></i>
+              </button>
+              <button class="btn-icon" aria-label="More" id="moreBtn">
+                <i class="fa-solid fa-ellipsis"></i>
+              </button>
+            </div>
+
+            <div class="hero-switcher">
+              <div class="switcher-title">Featured Selection</div>
+              <div class="thumbnails-container" id="thumbnails">
+                <div class="thumb-card active" data-index="0">
+                  <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+                  <div class="card-info">Book Cover</div>
+                </div>
+                <div class="thumb-card" data-index="1">
+                  <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop" alt="Elara Vane">
+                  <div class="card-info">Elara Vane</div>
+                </div>
+                <div class="thumb-card" data-index="2">
+                  <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop" alt="Kael Ashborne">
+                  <div class="card-info">Kael Ashborne</div>
+                </div>
+                <div class="thumb-card" data-index="3">
+                  <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop" alt="Lady Sera">
+                  <div class="card-info">Lady Sera</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="content-inner page-body-wrapper">
+
+        <!-- TABS -->
+        <div class="tabs-row" id="tabsRow">
+          <button class="tab-btn active" data-tab="about">About</button>
+          <button class="tab-btn" data-tab="reviews">Reviews</button>
+          <button class="tab-btn" data-tab="boxoffice">Box Office</button>
+        </div>
+
+        <!-- =========================================================
+             ABOUT
+             ========================================================= -->
+        <section class="section-block" data-panel="about">
+
+          <div class="about-text">
+            <p>The Ashen Crown is the opening chapter of the Ashborn Saga — a slow-burn political fantasy that trades prophecy for pragmatism and chosen ones for pragmatists. Alex Bedi's debut follows Elara Vane, a bastard daughter of a fallen dynasty who has spent her life hiding from the very throne she was born to inherit.</p>
+            <p>When an ash-priest discovers her identity, Elara must decide between the anonymity that has kept her alive and the crown that could either save or destroy everything she loves.</p>
+          </div>
+
+          <div class="quote-block">
+            <i class="fa-solid fa-quote-left"></i>
+            <p>"A crown is not a gift. It is a debt you pay for the rest of your life."</p>
+            <cite>Elara Vane · Chapter 14</cite>
+          </div>
+
+          <!-- CHAPTERS -->
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-list-ol"></i> Chapters</h2>
+              <span class="section-subtitle">34 chapters · 3 free</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="Chapter 1 · The Bastard Daughter">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status free">Free</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">01</div>
+              </div>
+              <div>
+                <div class="square-title">The Bastard Daughter</div>
+                <div class="square-meta">18 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 2 · Ash on the Wind">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status free">Free</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">02</div>
+              </div>
+              <div>
+                <div class="square-title">Ash on the Wind</div>
+                <div class="square-meta">22 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 3 · The Priest's Bargain">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status free">Free</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">03</div>
+              </div>
+              <div>
+                <div class="square-title">The Priest's Bargain</div>
+                <div class="square-meta">19 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 4 · A Throne of Salt">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status locked">Locked</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">04</div>
+              </div>
+              <div>
+                <div class="square-title">A Throne of Salt</div>
+                <div class="square-meta">24 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 5 · The Emperor's Ghost">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status locked">Locked</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">05</div>
+              </div>
+              <div>
+                <div class="square-title">The Emperor's Ghost</div>
+                <div class="square-meta">20 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 6 · Blood and Ink">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status locked">Locked</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">06</div>
+              </div>
+              <div>
+                <div class="square-title">Blood and Ink</div>
+                <div class="square-meta">21 pages</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Chapter 7 · The Long Road to Vael">
+              <div class="chapter-card-box">
+                <span class="chapter-card-status locked">Locked</span>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="">
+                <div class="chapter-card-num">07</div>
+              </div>
+              <div>
+                <div class="square-title">The Long Road to Vael</div>
+                <div class="square-meta">26 pages</div>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- CHARACTERS -->
+          <div class="section-header" style="margin-top: 24px;">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-masks-theater"></i> Meet the Characters</h2>
+              <span class="section-subtitle">6 key characters in this story</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="Elara Vane">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop" alt="Elara Vane">
+              </div>
+              <div>
+                <div class="square-title">Elara Vane</div>
+                <div class="square-meta">Bastard heir</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Kael Ashborne">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop" alt="Kael Ashborne">
+              </div>
+              <div>
+                <div class="square-title">Kael Ashborne</div>
+                <div class="square-meta">Ash-priest</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Lady Sera">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop" alt="Lady Sera">
+              </div>
+              <div>
+                <div class="square-title">Lady Sera</div>
+                <div class="square-meta">Court advisor</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="The Emperor">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=400&auto=format&fit=crop" alt="The Emperor">
+              </div>
+              <div>
+                <div class="square-title">The Emperor</div>
+                <div class="square-meta">Fallen ruler</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Master Rhys">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" alt="Master Rhys">
+              </div>
+              <div>
+                <div class="square-title">Master Rhys</div>
+                <div class="square-meta">Swordmaster</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Nyx">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Nyx">
+              </div>
+              <div>
+                <div class="square-title">Nyx</div>
+                <div class="square-meta">Spy</div>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- BOOK DETAILS -->
+          <div class="section-header" style="margin-top: 24px;">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-circle-info"></i> Book Details</h2>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-cell">
+              <span class="info-label">Publisher</span>
+              <span class="info-value">Ashfire Press</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-label">Published</span>
+              <span class="info-value">March 12, 2025</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-label">Language</span>
+              <span class="info-value">English</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-label">Format</span>
+              <span class="info-value">eBook · Hardcover</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-label">ISBN</span>
+              <span class="info-value">978-1-234-56789-0</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-label">Chapters</span>
+              <span class="info-value">34 <small>+ epilogue</small></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             REVIEWS — redesigned
+             ========================================================= -->
+        <section class="section-block" data-panel="reviews" hidden>
+
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-comment-dots"></i> Reader Reviews</h2>
+              <span class="section-subtitle">From readers who finished the book</span>
+            </div>
+          </div>
+
+          <div class="reviews-summary">
+            <div class="reviews-score-block">
+              <span class="reviews-score-big">4.8</span>
+              <div class="reviews-score-meta">
+                <div class="reviews-score-stars">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <span class="reviews-score-count">28,401 reviews</span>
+              </div>
+            </div>
+            <div class="reviews-filter">
+              <button class="filter-pill active">Most Helpful</button>
+              <button class="filter-pill">Recent</button>
+              <button class="filter-pill">Critical</button>
+            </div>
+          </div>
+
+          <div class="reviews-grid">
+
+            <article class="review-card">
+              <div class="review-head">
+                <div class="review-avatar">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" alt="">
+                </div>
+                <div class="review-user">
+                  <div class="review-name-row">
+                    <span class="review-name">@seravoss</span>
+                    <span class="review-verified"><i class="fa-solid fa-circle-check"></i>Verified</span>
+                  </div>
+                  <span class="review-time">2 days ago · Read 100%</span>
+                </div>
+                <div class="review-rating-badge">
+                  <i class="fa-solid fa-star"></i> 5.0
+                </div>
+              </div>
+              <p class="review-text">The pacing is deliberate and the payoff is massive. Elara is the kind of protagonist you spend the first 100 pages not being sure you like — and by the end you'd burn a city for her. Bedi doesn't fall into the chosen-one trap. Every conversation has weight, every betrayal lands, and the ash-priests are genuinely terrifying in a way most fantasy villains never manage.</p>
+              <div class="review-foot">
+                <button class="review-action"><i class="fa-regular fa-thumbs-up"></i><span>142</span></button>
+                <button class="review-action"><i class="fa-regular fa-comment"></i><span>Reply</span></button>
+              </div>
+            </article>
+
+            <article class="review-card">
+              <div class="review-head">
+                <div class="review-avatar">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="">
+                </div>
+                <div class="review-user">
+                  <div class="review-name-row">
+                    <span class="review-name">@nkreyes</span>
+                  </div>
+                  <span class="review-time">5 days ago · Read 100%</span>
+                </div>
+                <div class="review-rating-badge">
+                  <i class="fa-solid fa-star"></i> 4.5
+                </div>
+              </div>
+              <p class="review-text">Political fantasy done right. The worldbuilding is dense without being exhausting, and I appreciated that the magic system never once undercuts the stakes. Lady Sera is a standout — the way her loyalty is written feels earned, not convenient.</p>
+              <div class="review-foot">
+                <button class="review-action liked"><i class="fa-solid fa-thumbs-up"></i><span>89</span></button>
+                <button class="review-action"><i class="fa-regular fa-comment"></i><span>Reply</span></button>
+              </div>
+            </article>
+
+            <article class="review-card">
+              <div class="review-head">
+                <div class="review-avatar">
+                  <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" alt="">
+                </div>
+                <div class="review-user">
+                  <div class="review-name-row">
+                    <span class="review-name">@mcross</span>
+                    <span class="review-verified"><i class="fa-solid fa-circle-check"></i>Verified</span>
+                  </div>
+                  <span class="review-time">1 week ago · Read 82%</span>
+                </div>
+                <div class="review-rating-badge">
+                  <i class="fa-solid fa-star"></i> 5.0
+                </div>
+              </div>
+              <p class="review-text">If you loved the political maneuvering of The Goblin Emperor but wished it had more edge, this is your book. Already preordered book two — the last three chapters are some of the best fantasy writing I've read in a decade.</p>
+              <div class="review-foot">
+                <button class="review-action"><i class="fa-regular fa-thumbs-up"></i><span>56</span></button>
+                <button class="review-action"><i class="fa-regular fa-comment"></i><span>Reply</span></button>
+              </div>
+            </article>
+
+            <article class="review-card">
+              <div class="review-head">
+                <div class="review-avatar">
+                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" alt="">
+                </div>
+                <div class="review-user">
+                  <div class="review-name-row">
+                    <span class="review-name">@lenamarsh</span>
+                  </div>
+                  <span class="review-time">2 weeks ago · Read 100%</span>
+                </div>
+                <div class="review-rating-badge">
+                  <i class="fa-solid fa-star"></i> 4.0
+                </div>
+              </div>
+              <p class="review-text">Dense opening, but once you're in the court intrigue, it doesn't let you go. Elara's arc carries the whole thing. My one gripe is that the middle third drags — I would have loved 40 fewer pages and more time with Nyx.</p>
+              <div class="review-foot">
+                <button class="review-action"><i class="fa-regular fa-thumbs-up"></i><span>34</span></button>
+                <button class="review-action"><i class="fa-regular fa-comment"></i><span>Reply</span></button>
+              </div>
+            </article>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             BOX OFFICE
+             ========================================================= -->
+        <section class="section-block" data-panel="boxoffice" hidden>
+
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Box Office</h2>
+              <span class="section-subtitle">Live performance metrics</span>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-cell">
+              <span class="stat-value">84,291</span>
+              <span class="stat-label">Copies Sold</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-value">126,402</span>
+              <span class="stat-label">Readers</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-value">842,190</span>
+              <span class="stat-label">Reads</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-value">38,104</span>
+              <span class="stat-label">Favorites</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-value">14,201</span>
+              <span class="stat-label">Followers</span>
+            </div>
+            <div class="stat-cell">
+              <span class="stat-value">72<small>%</small></span>
+              <span class="stat-label">Completion</span>
+            </div>
+          </div>
+
+          <!-- CHAPTER RATINGS -->
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-list-check"></i> Chapter Ratings</h2>
+              <span class="section-subtitle">Reader score per chapter · out of 10</span>
+            </div>
+          </div>
+
+          <div class="chapter-rating-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#DC2626"></span> Hate</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#EA580C"></span> Dislike</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#EAB308"></span> Neutral</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#84CC16"></span> Like</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#22C55E"></span> Love</span>
+          </div>
+
+          <div class="chapter-rating-grid">
+            <button class="chapter-pill" data-chapter="1">
+              <span class="chapter-pill-label">C1</span>
+              <span class="chapter-pill-score tier-like">8.2</span>
+            </button>
+            <button class="chapter-pill" data-chapter="2">
+              <span class="chapter-pill-label">C2</span>
+              <span class="chapter-pill-score tier-like">8.1</span>
+            </button>
+            <button class="chapter-pill" data-chapter="3">
+              <span class="chapter-pill-label">C3</span>
+              <span class="chapter-pill-score tier-love">8.5</span>
+            </button>
+            <button class="chapter-pill" data-chapter="4">
+              <span class="chapter-pill-label">C4</span>
+              <span class="chapter-pill-score tier-like">8.1</span>
+            </button>
+            <button class="chapter-pill" data-chapter="5">
+              <span class="chapter-pill-label">C5</span>
+              <span class="chapter-pill-score tier-love">8.9</span>
+            </button>
+            <button class="chapter-pill" data-chapter="6">
+              <span class="chapter-pill-label">C6</span>
+              <span class="chapter-pill-score tier-love">9.0</span>
+            </button>
+            <button class="chapter-pill" data-chapter="7">
+              <span class="chapter-pill-label">C7</span>
+              <span class="chapter-pill-score tier-love">8.6</span>
+            </button>
+            <button class="chapter-pill" data-chapter="8">
+              <span class="chapter-pill-label">C8</span>
+              <span class="chapter-pill-score tier-love">9.1</span>
+            </button>
+            <button class="chapter-pill" data-chapter="9">
+              <span class="chapter-pill-label">C9</span>
+              <span class="chapter-pill-score tier-neutral">7.8</span>
+            </button>
+          </div>
+
+          <div class="chapter-rating-note">
+            <i class="fa-solid fa-circle-info"></i>
+            Updated weekly from reader scores per chapter
+          </div>
+
+          <!-- AWARDS -->
+          <div class="section-header" style="margin-top: 40px;">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Awards</h2>
+            </div>
+          </div>
+
+          <div class="awards-list">
+            <div class="award-row">
+              <div class="award-icon"><i class="fa-solid fa-trophy"></i></div>
+              <div class="award-info">
+                <span class="award-name">Best-Selling Book</span>
+                <span class="award-detail">The Crown · 2026</span>
+              </div>
+            </div>
+            <div class="award-row">
+              <div class="award-icon"><i class="fa-solid fa-rocket"></i></div>
+              <div class="award-info">
+                <span class="award-name">Breakthrough Book</span>
+                <span class="award-detail">The Surge · 2026</span>
+              </div>
+            </div>
+            <div class="award-row">
+              <div class="award-icon"><i class="fa-solid fa-star"></i></div>
+              <div class="award-info">
+                <span class="award-name">Most Read Book</span>
+                <span class="award-detail">The Crown · 2026</span>
+              </div>
+            </div>
+            <div class="award-row">
+              <div class="award-icon"><i class="fa-solid fa-bolt"></i></div>
+              <div class="award-info">
+                <span class="award-name">4 Box Office Records</span>
+                <span class="award-detail">Fastest to 10K · Most Reads in Season · +2</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             MORE LIKE THIS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-book-open"></i> More Like This</h2>
+              <span class="section-subtitle">Readers who loved this also enjoyed</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+            <button class="square-card" data-title="Blood of Kings">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">Blood of Kings</div>
+                <div class="square-meta">Sera Voss</div>
+              </div>
+            </button>
+            <button class="square-card" data-title="The Last Saint">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">The Last Saint</div>
+                <div class="square-meta">N. K. Reyes</div>
+              </div>
+            </button>
+            <button class="square-card" data-title="A Court of Embers">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">A Court of Embers</div>
+                <div class="square-meta">Lena Marsh</div>
+              </div>
+            </button>
+            <button class="square-card" data-title="The Hollow Vow">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">The Hollow Vow</div>
+                <div class="square-meta">Ilya Fenn</div>
+              </div>
+            </button>
+            <button class="square-card" data-title="Necromancer's Debt">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">Necromancer's Debt</div>
+                <div class="square-meta">Kai Tanaka</div>
+              </div>
+            </button>
+            <button class="square-card" data-title="The Wolf's Bride">
+              <div class="square-img-box"><img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" alt=""></div>
+              <div>
+                <div class="square-title">The Wolf's Bride</div>
+                <div class="square-meta">Astrid Lind</div>
+              </div>
+            </button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-compass"></i>
+      <span>New</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    /* HERO CAROUSEL */
+    const heroContainer = document.getElementById('heroContainer');
+    const heroBgA = document.getElementById('heroBgA');
+    const heroBgB = document.getElementById('heroBgB');
+    const heroContentBox = document.getElementById('heroContentBox');
+    const heroTag = document.getElementById('heroTag');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroDesc = document.getElementById('heroDesc');
+    const thumbCards = document.querySelectorAll('.thumb-card');
+
+    const heroSlides = [
+      {
+        bg: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920&auto=format&fit=crop',
+        tag: 'Alex Bedi',
+        title: 'The Ashen Crown',
+        desc: 'When the last emperor falls, a bastard princess must claim a throne that was never hers — while an ancient order of ash-priests hunts the only bloodline that can end their reign forever.'
+      },
+      {
+        bg: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1920&auto=format&fit=crop',
+        tag: 'Elara Vane · Protagonist',
+        title: 'The Ashen Crown',
+        desc: 'A bastard heir raised in hiding. Sharp, patient, and dangerous when cornered. She has spent her whole life preparing for a throne she was never supposed to inherit.'
+      },
+      {
+        bg: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1920&auto=format&fit=crop',
+        tag: 'Kael Ashborne · Ash-Priest',
+        title: 'The Ashen Crown',
+        desc: 'The priest who knows her name. He serves the order that hunts her bloodline — and he has his own reasons for keeping her alive.'
+      },
+      {
+        bg: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1920&auto=format&fit=crop',
+        tag: 'Lady Sera · Court Advisor',
+        title: 'The Ashen Crown',
+        desc: 'The last loyal voice of a broken court. She was the old emperor\'s closest confidante — and the only one who knows what really happened the night he fell.'
+      }
+    ];
+
+    let activeBgIndex = 0;
+    let currentSlideIndex = 0;
+    let switching = false;
+    let heroInterval = null;
+    const HERO_INTERVAL = 5000;
+
+    function setHeroBackground(url) {
+      const nextIndex = 1 - activeBgIndex;
+      const nextLayer = nextIndex === 0 ? heroBgA : heroBgB;
+      const prevLayer = nextIndex === 0 ? heroBgB : heroBgA;
+      nextLayer.style.backgroundImage = `url("${url}")`;
+      void nextLayer.offsetWidth;
+      nextLayer.classList.add('active');
+      prevLayer.classList.remove('active');
+      activeBgIndex = nextIndex;
+    }
+
+    function updateHero(index) {
+      if (switching || index === currentSlideIndex) return;
+      switching = true;
+      currentSlideIndex = index;
+      const slide = heroSlides[index];
+      thumbCards.forEach((c, i) => c.classList.toggle('active', i === index));
+      setHeroBackground(slide.bg);
+      heroContentBox.classList.add('is-switching');
+      setTimeout(() => {
+        heroTag.textContent = slide.tag;
+        heroTitle.textContent = slide.title;
+        heroDesc.textContent = slide.desc;
+        heroContentBox.classList.remove('is-switching');
+        switching = false;
+      }, 320);
+    }
+
+    function startHeroRotation() {
+      clearInterval(heroInterval);
+      heroInterval = setInterval(() => {
+        const next = (currentSlideIndex + 1) % heroSlides.length;
+        updateHero(next);
+      }, HERO_INTERVAL);
+    }
+    function resetHeroRotation() { startHeroRotation(); }
+
+    heroContainer.addEventListener('mouseenter', () => clearInterval(heroInterval));
+    heroContainer.addEventListener('mouseleave', startHeroRotation);
+
+    thumbCards.forEach((card, i) => {
+      card.addEventListener('click', () => {
+        updateHero(i);
+        resetHeroRotation();
+      });
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          updateHero(i);
+          resetHeroRotation();
+        }
+      });
+    });
+
+    startHeroRotation();
+
+    /* TABS */
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        document.querySelectorAll('[data-panel]').forEach(panel => {
+          panel.hidden = panel.dataset.panel !== target;
+        });
+        document.querySelectorAll('[data-panel]:not([hidden])').forEach(p => {
+          p.classList.add('in-view');
+        });
+      });
+    });
+
+    /* HERO ACTIONS */
+    document.getElementById('readBtn').addEventListener('click', () => showToast('Opening reader…'));
+    document.getElementById('saveBtn').addEventListener('click', function() {
+      const icon = this.querySelector('i');
+      if (icon.classList.contains('fa-bookmark')) {
+        icon.classList.remove('fa-bookmark', 'fa-regular');
+        icon.classList.add('fa-solid');
+        showToast('Added to library');
+      } else {
+        icon.classList.remove('fa-solid');
+        icon.classList.add('fa-regular', 'fa-bookmark');
+        showToast('Removed from library');
+      }
+    });
+    document.getElementById('shareBtn').addEventListener('click', () => showToast('Share link copied'));
+    document.getElementById('moreBtn').addEventListener('click', () => showToast('More options'));
+
+    /* CHAPTER RATING PILLS */
+    document.querySelectorAll('.chapter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const n = pill.dataset.chapter;
+        const score = pill.querySelector('.chapter-pill-score').textContent;
+        showToast('Chapter ' + n + ' · rated ' + score + '/10');
+      });
+    });
+
+    /* REVIEW FILTERS */
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        showToast('Sorting reviews by ' + pill.textContent);
+      });
+    });
+
+    /* REVIEW ACTIONS */
+    document.querySelectorAll('.review-action').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const label = btn.querySelector('span')?.textContent || '';
+        if (label === 'Reply') {
+          showToast('Opening reply…');
+        } else {
+          const wasLiked = btn.classList.contains('liked');
+          btn.classList.toggle('liked');
+          const icon = btn.querySelector('i');
+          const count = parseInt(btn.querySelector('span').textContent) || 0;
+          if (!wasLiked) {
+            icon.classList.remove('fa-regular');
+            icon.classList.add('fa-solid');
+            btn.querySelector('span').textContent = count + 1;
+          } else {
+            icon.classList.remove('fa-solid');
+            icon.classList.add('fa-regular');
+            btn.querySelector('span').textContent = Math.max(0, count - 1);
+          }
+        }
+      });
+    });
+
+    /* BACK */
+    document.getElementById('backLink').addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+
+    /* CAROUSEL CARDS */
+    document.querySelectorAll('.square-card').forEach(card => {
+      card.addEventListener('click', () => showToast('Opening “' + card.dataset.title + '”'));
+    });
+
+    /* SIDEBAR */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    /* SCROLL REVEAL */
+    (function initScrollReveal() {
+      const sections = document.querySelectorAll('.section-block');
+      if (!sections.length) return;
+      const viewportH = window.innerHeight || document.documentElement.clientHeight;
+      sections.forEach((s) => {
+        const rect = s.getBoundingClientRect();
+        if (rect.top < viewportH * 0.92 && !s.hidden) s.classList.add('in-view');
+      });
+      document.body.classList.add('reveal-ready');
+      if (!('IntersectionObserver' in window)) {
+        sections.forEach((s) => s.classList.add('in-view'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.06, rootMargin: '0px 0px -60px 0px' });
+      sections.forEach((s) => {
+        if (!s.classList.contains('in-view') && !s.hidden) observer.observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>

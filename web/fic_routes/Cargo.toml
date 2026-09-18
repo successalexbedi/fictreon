@@ -1,0 +1,6 @@
+[package]
+name = "fic_routes"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

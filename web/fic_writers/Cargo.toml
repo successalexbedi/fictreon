@@ -1,0 +1,6 @@
+[package]
+name = "fic_writers"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

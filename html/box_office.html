@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fictreon - Box Office</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-deep: #8B0A1F;
+      --accent-bright: #E63946;
+      --up: #22C55E;
+      --down: #EF4444;
+      --gold: #F4B942;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+      --content-px: 48px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 3px;
+      cursor: pointer;
+    }
+    .logo span { color: var(--accent); }
+
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      width: 3px; height: 60%;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0);
+      transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      cursor: pointer;
+      text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main);
+      color: var(--bg-base);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ========== MOBILE HEADER ========== */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .menu-toggle:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-active); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 950;
+    }
+
+    /* ========== MOBILE BOTTOM NAV ========== */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      gap: 4px;
+      flex: 1; height: 100%;
+      position: relative;
+      transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i,
+    .mobile-bottom-nav .nav-item:active i { transform: scale(1.12); }
+
+    /* ========== MAIN WRAPPER ========== */
+    .main-content-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 var(--content-px);
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ========== PAGE HEADER ========== */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      padding: 48px 0 28px;
+      margin-bottom: 24px;
+      position: relative;
+      flex-wrap: wrap;
+      animation: heroEnter 0.8s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200,16,46,0.35), rgba(200,16,46,0) 40%);
+    }
+    .page-kicker {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .page-kicker .red-bar {
+      width: 3px; height: 12px;
+      background-color: var(--accent);
+      border-radius: 1px;
+    }
+    .page-title {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* Season indicator — intentional glow on the left edge (live status) */
+    .season-pill {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, rgba(200,16,46,0.14) 0%, rgba(20,21,26,0.9) 100%);
+      border: 1px solid rgba(200,16,46,0.35);
+      border-radius: 14px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .season-pill::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(200,16,46,0.85);
+    }
+    .season-icon {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(200,16,46,0.18);
+      border: 1px solid rgba(200,16,46,0.4);
+      border-radius: 10px;
+      color: var(--accent-bright);
+      font-size: 16px;
+    }
+    .season-text { display: flex; flex-direction: column; gap: 1px; }
+    .season-label {
+      font-size: 9.5px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .season-value { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
+    .season-dates { font-size: 10.5px; color: var(--text-muted); font-weight: 500; }
+
+    /* ========== CONTROLS ========== */
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .entity-toggle {
+      display: inline-flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 2px;
+    }
+    .entity-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+    .entity-btn i { font-size: 11px; }
+    .entity-btn:hover { color: var(--text-main); }
+    /* Intentional: active toggle = solid accent, no glow */
+    .entity-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .period-tabs {
+      display: inline-flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 2px;
+      margin-left: auto;
+    }
+    .period-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .period-tab:hover { color: var(--text-main); }
+    .period-tab.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .category-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 32px;
+      scrollbar-width: none;
+      width: 100%;
+    }
+    .category-pills::-webkit-scrollbar { display: none; }
+    .category-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .category-pill i { font-size: 10px; }
+    .category-pill:hover { color: var(--text-main); border-color: var(--border-active); }
+    .category-pill.active {
+      background: rgba(200,16,46,0.12);
+      border-color: rgba(200,16,46,0.5);
+      color: var(--text-main);
+    }
+    .category-pill.active i { color: var(--accent-bright); }
+
+    /* ========== VIEW SWITCHER ========== */
+    .view[hidden] { display: none !important; }
+
+    /* =========================================================
+       CHART PANEL — full-width breakout
+       ========================================================= */
+    .chart-panel {
+      margin-left: calc(-1 * var(--content-px));
+      margin-right: calc(-1 * var(--content-px));
+      margin-bottom: 64px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== PODIUM ========== */
+    .podium-wrap {
+      background: linear-gradient(180deg, rgba(20, 21, 26, 0.75) 0%, rgba(11, 12, 16, 0.25) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px 24px 0 0;
+      padding: 128px 40px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Intentional: soft spotlight behind the podium, but only for the current champion */
+    .podium-wrap::before {
+      content: '';
+      position: absolute;
+      top: -30%; left: 50%;
+      transform: translateX(-50%);
+      width: 70%; height: 100%;
+      background: radial-gradient(ellipse, rgba(200, 16, 46, 0.16) 0%, transparent 60%);
+      pointer-events: none;
+      animation: glowDrift 12s ease-in-out infinite;
+    }
+    @keyframes glowDrift {
+      0%, 100% { transform: translateX(-50%) scale(1); }
+      50%      { transform: translateX(-50%) scale(1.15); }
+    }
+
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 18px;
+      max-width: 780px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .podium-slot {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 0.35s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .podium-block {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 18px 18px 0 0;
+      overflow: visible;
+      text-align: center;
+      padding: 0 12px 20px;
+    }
+    .podium-block::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px 18px 0 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .podium-slot.slot-2 .podium-block { height: 240px; padding-top: 96px; }
+    .podium-slot.slot-2 .podium-block::before {
+      background: linear-gradient(180deg, rgba(139, 10, 31, 0.7) 0%, rgba(58, 4, 16, 0.98) 100%);
+      border: 1px solid rgba(200, 16, 46, 0.28);
+      border-bottom: none;
+    }
+    .podium-slot.slot-1 .podium-block { height: 310px; padding-top: 118px; }
+    .podium-slot.slot-1 .podium-block::before {
+      background: linear-gradient(180deg, rgba(200, 16, 46, 0.72) 0%, rgba(92, 7, 20, 0.98) 100%);
+      border: 1px solid rgba(200, 16, 46, 0.5);
+      border-bottom: none;
+      /* Intentional: winner podium has a soft upward spotlight */
+      box-shadow: 0 -10px 50px rgba(200, 16, 46, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .podium-slot.slot-3 .podium-block { height: 200px; padding-top: 96px; }
+    .podium-slot.slot-3 .podium-block::before {
+      background: linear-gradient(180deg, rgba(90, 8, 24, 0.75) 0%, rgba(30, 2, 8, 0.98) 100%);
+      border: 1px solid rgba(139, 10, 31, 0.28);
+      border-bottom: none;
+    }
+
+    /* Author variant: square-ish avatars */
+    .podium-slot.is-author.slot-2 .podium-block,
+    .podium-slot.is-author.slot-3 .podium-block { padding-top: 72px; }
+    .podium-slot.is-author.slot-1 .podium-block { padding-top: 88px; }
+
+    .podium-book-wrap {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translate(-50%, -58%);
+      width: 84px;
+      aspect-ratio: 3 / 5;
+      border-radius: 5px;
+      overflow: hidden;
+      background: #0a0a0a;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75), 0 0 0 4px rgba(11, 12, 16, 0.8);
+      z-index: 2;
+      transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+    /* Intentional: only the #1 has the accent halo */
+    .podium-slot.slot-1 .podium-book-wrap {
+      width: 116px;
+      border-radius: 7px;
+      border-color: rgba(255, 255, 255, 0.35);
+      box-shadow:
+        0 24px 55px rgba(0, 0, 0, 0.85),
+        0 0 0 5px rgba(11, 12, 16, 0.85),
+        0 0 30px rgba(200, 16, 46, 0.35);
+    }
+
+    /* Author avatar — square, rounded */
+    .podium-slot.is-author .podium-book-wrap {
+      aspect-ratio: 1 / 1;
+      width: 92px;
+      border-radius: 14px;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .podium-slot.is-author.slot-1 .podium-book-wrap {
+      width: 122px;
+      border-radius: 16px;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .podium-book { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Intentional: crown indicates rank 1 */
+    .podium-crown {
+      position: absolute;
+      top: -14px; left: 50%;
+      transform: translateX(-50%);
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      color: #2a1a05;
+      background: linear-gradient(180deg, #FFD86B 0%, #F4B942 60%, #B88416 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 16px rgba(244, 185, 66, 0.55), 0 4px 10px rgba(0, 0, 0, 0.55);
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      z-index: 3;
+    }
+
+    .podium-info {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      min-width: 0;
+      margin-bottom: auto;
+    }
+    .podium-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      padding: 0 2px;
+    }
+    .podium-slot.slot-1 .podium-name { font-size: 13.5px; }
+    .podium-author {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+    .podium-metric-label {
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: rgba(255, 255, 255, 0.42);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    .podium-copies {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.92);
+      margin-top: 1px;
+      font-feature-settings: 'tnum';
+      letter-spacing: 0.2px;
+    }
+    .podium-slot.slot-1 .podium-copies { font-size: 13px; color: #fff; }
+
+    .podium-num {
+      position: relative;
+      z-index: 1;
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -3px;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+      font-feature-settings: 'tnum';
+      margin-top: 10px;
+    }
+    .podium-slot.slot-1 .podium-num {
+      font-size: 76px;
+      color: #fff;
+      text-shadow: 0 0 24px rgba(200, 16, 46, 0.5), 0 2px 20px rgba(0, 0, 0, 0.55);
+      letter-spacing: -4px;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .podium-slot:hover { transform: translateY(-5px); }
+      .podium-slot:hover .podium-book-wrap {
+        transform: translate(-50%, -58%) scale(1.05);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+    }
+    .podium-slot:active { transform: translateY(-2px) scale(0.99); }
+    .podium-slot:focus-visible { outline: none; }
+    .podium-slot:focus-visible .podium-block::before {
+      outline: 2px solid rgba(200, 16, 46, 0.85);
+      outline-offset: 4px;
+    }
+
+    /* ========== RANK LIST ========== */
+    .rank-list-wrap {
+      background: linear-gradient(180deg, rgba(20, 21, 26, 0.5) 0%, rgba(11, 12, 16, 0.92) 100%);
+      border: 1px solid var(--border-subtle);
+      border-top: none;
+      border-radius: 0 0 24px 24px;
+      padding: 24px 40px 32px;
+      position: relative;
+    }
+    .rank-list-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 40px; right: 40px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(200, 16, 46, 0.28) 50%, transparent);
+    }
+    .rank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .rank-row {
+      display: grid;
+      grid-template-columns: 56px 42px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 11px 18px 11px 10px;
+      background: rgba(20, 21, 26, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
+      transition: background 0.22s ease, border-color 0.22s ease;
+    }
+    .rank-row::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 22%;
+      height: 56%; width: 3px;
+      background: var(--accent);
+      border-radius: 0 3px 3px 0;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .rank-row:hover { background: rgba(27, 28, 36, 0.95); border-color: var(--border-active); }
+    .rank-row:hover::before { transform: scaleY(1); }
+
+    .rank-pos-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      justify-content: center;
+      height: 100%;
+    }
+    .rank-pos {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.5px;
+      line-height: 1;
+      opacity: 0.55;
+    }
+    .rank-move {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .rank-move.up { color: var(--up); }
+    .rank-move.down { color: var(--down); }
+    .rank-move.new {
+      color: #fff;
+      background: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .rank-thumb {
+      width: 42px;
+      aspect-ratio: 2 / 3;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #000;
+      flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+    .rank-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.92);
+    }
+    /* Author rank thumb — square */
+    .rank-thumb.is-avatar {
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+    }
+
+    .rank-row:hover .rank-thumb { border-color: rgba(200, 16, 46, 0.45); }
+
+    .rank-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .rank-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.1px;
+    }
+    .rank-author {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rank-value {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+    .rank-count {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.2px;
+      line-height: 1.1;
+    }
+    .rank-label {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ========== SECTION HEADERS ========== */
+    .section-block { margin-bottom: 56px; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      flex-wrap: wrap;
+    }
+    .section-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200, 16, 46, 0.4), rgba(200, 16, 46, 0) 35%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1s cubic-bezier(0.22, 0.7, 0.4, 1);
+      pointer-events: none;
+    }
+    body.reveal-ready .section-block.in-view .section-header::after { transform: scaleX(1); }
+    .section-title-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.3px;
+    }
+    .section-title i {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+      padding-left: 24px;
+      letter-spacing: 0.1px;
+    }
+    .section-action {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      white-space: nowrap;
+    }
+    .section-action:hover { color: var(--text-main); }
+    .section-action i { font-size: 10px; }
+
+    /* =========================================================
+       FEATURED PROFILE CARD (single per view)
+       ========================================================= */
+    .featured-wrap {
+      margin-bottom: 56px;
+      display: flex;
+      justify-content: center;
+    }
+    .profile-card {
+      width: 100%;
+      max-width: 720px;
+      background: linear-gradient(160deg, rgba(20, 21, 26, 0.95) 0%, rgba(11, 12, 16, 0.98) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    /* Intentional: subtle radial accent in one corner for the featured card */
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -20%;
+      width: 60%; height: 200%;
+      background: radial-gradient(ellipse, rgba(200, 16, 46, 0.1) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .profile-card:hover { border-color: var(--border-active); }
+
+    .profile-kicker {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .profile-kicker::before {
+      content: '';
+      width: 3px; height: 10px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+
+    .profile-header {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+      position: relative;
+      z-index: 1;
+    }
+    .profile-cover {
+      width: 100px;
+      aspect-ratio: 3 / 5;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(11, 12, 16, 0.7);
+      flex-shrink: 0;
+      background: #000;
+    }
+    .profile-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .profile-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 0 3px rgba(11, 12, 16, 0.7);
+      flex-shrink: 0;
+      background: #000;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .profile-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      padding-top: 4px;
+    }
+    .profile-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      line-height: 1.15;
+      color: #fff;
+    }
+    .profile-byline {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .profile-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .profile-tag.accent {
+      background: rgba(200, 16, 46, 0.15);
+      border-color: rgba(200, 16, 46, 0.4);
+      color: var(--accent-bright);
+    }
+    .profile-tag.gold {
+      background: rgba(244, 185, 66, 0.12);
+      border-color: rgba(244, 185, 66, 0.35);
+      color: var(--gold);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .metric-cell {
+      background: rgba(20, 21, 26, 0.7);
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+    .metric-cell:hover { background: rgba(27, 28, 36, 0.9); }
+    .metric-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .metric-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .metric-value small {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 1px;
+    }
+
+    .period-strip {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: rgba(11, 12, 16, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 4px 0;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: relative;
+      z-index: 1;
+    }
+    .period-strip::-webkit-scrollbar { display: none; }
+    .period-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 8px 14px;
+      min-width: 78px;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .period-cell:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 22%;
+      height: 56%; width: 1px;
+      background: var(--border-subtle);
+    }
+    .period-cell:hover { background: rgba(255, 255, 255, 0.03); }
+    .period-cell.active { background: rgba(200, 16, 46, 0.1); }
+    .period-cell.active .period-value { color: var(--accent-bright); }
+    .period-name {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .period-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.3px;
+      transition: color 0.2s;
+    }
+
+    .recognition-block {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .recognition-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(11, 12, 16, 0.55);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .recognition-row.award {
+      background: linear-gradient(90deg, rgba(244, 185, 66, 0.1) 0%, rgba(11, 12, 16, 0.55) 50%);
+      border-color: rgba(244, 185, 66, 0.22);
+    }
+    .recognition-row.award:hover { border-color: rgba(244, 185, 66, 0.5); }
+    .recognition-row.record {
+      background: linear-gradient(90deg, rgba(200, 16, 46, 0.12) 0%, rgba(11, 12, 16, 0.55) 50%);
+      border-color: rgba(200, 16, 46, 0.25);
+    }
+    .recognition-row.record:hover { border-color: rgba(200, 16, 46, 0.55); }
+    .recognition-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .recognition-icon.gold {
+      background: rgba(244, 185, 66, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(244, 185, 66, 0.3);
+    }
+    .recognition-icon.red {
+      background: rgba(200, 16, 46, 0.15);
+      color: var(--accent-bright);
+      border: 1px solid rgba(200, 16, 46, 0.35);
+    }
+    .recognition-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+      flex: 1;
+    }
+    .recognition-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recognition-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    /* =========================================================
+       AWARDS GRID
+       ========================================================= */
+    .awards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .award-card {
+      background: linear-gradient(160deg, rgba(244, 185, 66, 0.06) 0%, rgba(20, 21, 26, 0.9) 55%);
+      border: 1px solid rgba(244, 185, 66, 0.18);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: border-color 0.25s, box-shadow 0.35s;
+    }
+    /* Intentional: soft gold radial on award cards */
+    .award-card::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -30%;
+      width: 70%; height: 200%;
+      background: radial-gradient(ellipse, rgba(244, 185, 66, 0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .award-card:hover {
+      border-color: rgba(244, 185, 66, 0.5);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .award-trophy {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      color: #2a1a05;
+      background: linear-gradient(180deg, #FFD86B 0%, #F4B942 55%, #B88416 100%);
+      box-shadow: 0 0 16px rgba(244, 185, 66, 0.4), 0 4px 10px rgba(0, 0, 0, 0.45);
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .award-name {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .award-winner {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+      position: relative;
+      z-index: 1;
+    }
+    .award-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      z-index: 1;
+    }
+    .award-season {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(244, 185, 66, 0.12);
+      color: var(--gold);
+      border: 1px solid rgba(244, 185, 66, 0.25);
+      position: relative;
+      z-index: 1;
+    }
+    .award-season i { font-size: 8px; }
+
+    /* =========================================================
+       RECORDS LIST
+       ========================================================= */
+    .records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .record-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto auto;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px 14px 12px;
+      background: rgba(20, 21, 26, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      touch-action: manipulation;
+      transition: background 0.22s, border-color 0.22s;
+    }
+    .record-row::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 22%;
+      height: 56%; width: 3px;
+      background: var(--accent);
+      border-radius: 0 3px 3px 0;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .record-row:hover { background: rgba(27, 28, 36, 0.9); border-color: var(--border-active); }
+    .record-row:hover::before { transform: scaleY(1); }
+
+    .record-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      background: rgba(200, 16, 46, 0.14);
+      color: var(--accent-bright);
+      border: 1px solid rgba(200, 16, 46, 0.3);
+    }
+    .record-icon.gold {
+      background: rgba(244, 185, 66, 0.12);
+      color: var(--gold);
+      border-color: rgba(244, 185, 66, 0.3);
+    }
+    .record-icon.green {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--up);
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+    .record-info { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .record-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.1px;
+    }
+    .record-holder {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
+    .record-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-bright);
+      font-feature-settings: 'tnum';
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .record-date {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.2px;
+      min-width: 70px;
+      text-align: right;
+    }
+
+    /* ========== SEASON ARCHIVE ========== */
+    .season-history {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .season-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 18px;
+      cursor: pointer;
+      touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.22s, background 0.22s;
+    }
+    .season-card:hover { border-color: var(--border-active); background: var(--bg-surface-hover); }
+    .season-card.current {
+      background: linear-gradient(160deg, rgba(200, 16, 46, 0.12) 0%, rgba(20, 21, 26, 0.9) 60%);
+      border-color: rgba(200, 16, 46, 0.4);
+    }
+    /* Intentional: current season has a subtle top accent line */
+    .season-card.current::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: var(--accent);
+    }
+    .season-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.1px;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .season-card-name .live-dot {
+      width: 6px; height: 6px;
+      background: var(--accent-bright);
+      border-radius: 50%;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.85); }
+    }
+    .season-card-dates {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.4px;
+      margin-bottom: 12px;
+    }
+    .season-card-winner {
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .season-card-winner-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .season-card-winner-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .season-card-winner-name i { font-size: 9px; color: var(--gold); }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      :root { --content-px: 20px; }
+
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+
+      .page-header { padding-top: 32px; }
+      .page-title { font-size: 34px; }
+      .toast { bottom: 78px; }
+    }
+
+    @media (max-width: 820px) {
+      .podium-wrap { padding: 116px 24px 0; }
+      .podium { gap: 14px; max-width: 100%; }
+      .podium-slot.slot-1 .podium-block { height: 290px; padding-top: 110px; }
+      .podium-slot.slot-2 .podium-block { height: 225px; padding-top: 90px; }
+      .podium-slot.slot-3 .podium-block { height: 190px; padding-top: 90px; }
+      .podium-slot.slot-1 .podium-book-wrap { width: 102px; }
+      .podium-book-wrap { width: 76px; }
+      .podium-slot.is-author .podium-book-wrap { width: 84px; }
+      .podium-slot.is-author.slot-1 .podium-book-wrap { width: 108px; }
+      .podium-slot.slot-1 .podium-num { font-size: 68px; }
+      .podium-num { font-size: 48px; }
+      .rank-list-wrap { padding: 22px 24px 28px; }
+      .rank-list-wrap::before { left: 24px; right: 24px; }
+      .season-history { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .page-title { font-size: 30px; }
+      .page-sub { font-size: 12.5px; }
+      .season-pill { width: 100%; }
+      .controls-row { gap: 10px; }
+      .entity-toggle { width: 100%; }
+      .entity-btn { flex: 1; justify-content: center; padding: 8px 14px; }
+      .period-tabs { width: 100%; margin-left: 0; }
+      .period-tab { flex: 1; padding: 7px 10px; font-size: 11px; }
+
+      .podium-wrap { padding: 108px 16px 0; border-radius: 20px 20px 0 0; }
+      .podium { gap: 8px; }
+      .podium-slot.slot-1 .podium-block { height: 245px; padding-top: 96px; border-radius: 14px 14px 0 0; }
+      .podium-slot.slot-2 .podium-block { height: 195px; padding-top: 80px; border-radius: 14px 14px 0 0; }
+      .podium-slot.slot-3 .podium-block { height: 172px; padding-top: 80px; border-radius: 14px 14px 0 0; }
+      .podium-slot.is-author.slot-1 .podium-block { padding-top: 80px; }
+      .podium-slot.is-author.slot-2 .podium-block,
+      .podium-slot.is-author.slot-3 .podium-block { padding-top: 66px; }
+      .podium-slot.slot-1 .podium-block::before,
+      .podium-slot.slot-2 .podium-block::before,
+      .podium-slot.slot-3 .podium-block::before { border-radius: 14px 14px 0 0; }
+      .podium-slot.slot-1 .podium-book-wrap { width: 80px; border-radius: 6px; }
+      .podium-book-wrap { width: 62px; border-radius: 5px; border-width: 1.5px; }
+      .podium-slot.is-author .podium-book-wrap { width: 70px; border-radius: 12px; }
+      .podium-slot.is-author.slot-1 .podium-book-wrap { width: 90px; border-radius: 14px; }
+      .podium-crown { width: 24px; height: 24px; font-size: 10px; top: -12px; }
+      .podium-name { font-size: 10.5px; }
+      .podium-slot.slot-1 .podium-name { font-size: 11.5px; }
+      .podium-author { font-size: 9px; }
+      .podium-metric-label { font-size: 7.5px; margin-top: 4px; }
+      .podium-copies { font-size: 10px; }
+      .podium-slot.slot-1 .podium-copies { font-size: 11px; }
+      .podium-num { font-size: 40px; letter-spacing: -2px; margin-top: 7px; }
+      .podium-slot.slot-1 .podium-num { font-size: 56px; letter-spacing: -3px; }
+
+      .rank-list-wrap { padding: 16px 14px 20px; border-radius: 0 0 20px 20px; }
+      .rank-list-wrap::before { left: 14px; right: 14px; }
+      .rank-row {
+        grid-template-columns: 40px 40px 1fr auto;
+        gap: 11px;
+        padding: 10px 12px 10px 8px;
+        border-radius: 10px;
+      }
+      .rank-pos { font-size: 15px; }
+      .rank-thumb { width: 40px; border-radius: 5px; }
+      .rank-thumb.is-avatar { border-radius: 8px; }
+      .rank-title { font-size: 12.5px; }
+      .rank-author { font-size: 10.5px; }
+      .rank-count { font-size: 13px; }
+      .rank-label { font-size: 8.5px; }
+
+      .section-title { font-size: 16px; }
+      .section-subtitle { display: none; }
+
+      .profile-card { padding: 20px; border-radius: 16px; }
+      .profile-name { font-size: 18px; }
+      .profile-cover { width: 80px; }
+      .profile-avatar { width: 78px; height: 78px; border-radius: 14px; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .metric-value { font-size: 16px; }
+      .metric-cell { padding: 12px 12px 10px; }
+
+      .period-cell { min-width: 70px; padding: 8px 10px; }
+      .period-value { font-size: 13px; }
+
+      .awards-grid { grid-template-columns: 1fr; }
+      .record-row { grid-template-columns: 40px 1fr auto; gap: 12px; padding: 12px 14px 12px 10px; }
+      .record-icon { width: 40px; height: 40px; font-size: 14px; }
+      .record-date { display: none; }
+
+      .season-history { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 380px) {
+      .podium-wrap { padding: 96px 10px 0; }
+      .podium { gap: 6px; }
+      .podium-slot.slot-1 .podium-block { height: 225px; padding-top: 88px; }
+      .podium-slot.slot-2 .podium-block { height: 180px; padding-top: 74px; }
+      .podium-slot.slot-3 .podium-block { height: 158px; padding-top: 74px; }
+      .podium-slot.slot-1 .podium-book-wrap { width: 70px; }
+      .podium-book-wrap { width: 56px; }
+      .podium-slot.is-author .podium-book-wrap { width: 62px; border-radius: 10px; }
+      .podium-slot.is-author.slot-1 .podium-book-wrap { width: 80px; border-radius: 12px; }
+      .podium-name { font-size: 9.5px; }
+      .podium-slot.slot-1 .podium-name { font-size: 10.5px; }
+      .podium-author { font-size: 8.5px; }
+      .podium-copies { font-size: 9px; }
+      .podium-slot.slot-1 .podium-copies { font-size: 9.5px; }
+      .podium-num { font-size: 34px; }
+      .podium-slot.slot-1 .podium-num { font-size: 48px; }
+    }
+
+    /* Scroll reveal */
+    body.reveal-ready .section-block:not(.in-view) {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    body.reveal-ready .section-block {
+      transition: opacity 0.75s ease, transform 0.8s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    body.reveal-ready .section-block.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid var(--border-active);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      max-width: calc(100vw - 40px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Focus + tap */
+    .rank-row, .podium-slot, .award-card, .record-row, .season-card,
+    .entity-btn, .period-tab, .category-pill, .nav-item, .side-nav-links a {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    .rank-row:focus-visible, .podium-slot:focus-visible, .award-card:focus-visible,
+    .record-row:focus-visible, .season-card:focus-visible, .entity-btn:focus-visible,
+    .period-tab:focus-visible, .category-pill:focus-visible {
+      outline: 2px solid rgba(200, 16, 46, 0.85);
+      outline-offset: 3px;
+      border-radius: var(--radius-md);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">FICT<span>REON</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">FICT<span>REON</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-feather-pointed"></i> Authors</a>
+          <a href="#"><i class="fa-solid fa-compass"></i> Discover</a>
+          <a href="#" class="active"><i class="fa-solid fa-chart-line"></i> Box Office</a>
+          <a href="#"><i class="fa-solid fa-trophy"></i> Awards</a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> My Library</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div>
+            <div class="page-kicker">
+              <span class="red-bar"></span>
+              Live Performance
+            </div>
+            <h1 class="page-title">Box Office</h1>
+            <p class="page-sub">Measuring sales, readership, engagement, and momentum across every book and author on Fictreon.</p>
+          </div>
+
+          <div class="season-pill">
+            <div class="season-icon"><i class="fa-solid fa-crown"></i></div>
+            <div class="season-text">
+              <span class="season-label">Current Season</span>
+              <span class="season-value">The Crown</span>
+              <span class="season-dates">Oct 1 — Dec 31, 2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls-row">
+          <div class="entity-toggle" id="entityToggle">
+            <button class="entity-btn active" data-entity="books"><i class="fa-solid fa-book"></i> Books</button>
+            <button class="entity-btn" data-entity="authors"><i class="fa-solid fa-feather-pointed"></i> Authors</button>
+          </div>
+
+          <div class="period-tabs" id="periodTabs">
+            <button class="period-tab" data-period="today">Today</button>
+            <button class="period-tab" data-period="week">Week</button>
+            <button class="period-tab" data-period="month">Month</button>
+            <button class="period-tab active" data-period="season">Season</button>
+            <button class="period-tab" data-period="alltime">All Time</button>
+          </div>
+        </div>
+
+        <div class="category-pills" id="categoryPills">
+          <button class="category-pill" data-cat="read"><i class="fa-solid fa-book-open"></i> Most Read</button>
+          <button class="category-pill active" data-cat="sales"><i class="fa-solid fa-bag-shopping"></i> Best-Selling</button>
+          <button class="category-pill" data-cat="followers"><i class="fa-solid fa-user-plus"></i> Most Followed</button>
+          <button class="category-pill" data-cat="favorites"><i class="fa-solid fa-heart"></i> Most Favorited</button>
+          <button class="category-pill" data-cat="growth"><i class="fa-solid fa-arrow-trend-up"></i> Fastest Growing</button>
+          <button class="category-pill" data-cat="opening"><i class="fa-solid fa-rocket"></i> Biggest Opening</button>
+        </div>
+
+        <!-- =========================================================
+             BOOKS VIEW
+             ========================================================= -->
+        <div class="view" id="viewBooks">
+
+          <div class="chart-panel">
+            <div class="podium-wrap">
+              <div class="podium">
+
+                <!-- 2nd -->
+                <div class="podium-slot slot-2" data-title="Blood of Kings" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="Blood of Kings">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">Blood of Kings</div>
+                      <div class="podium-author">Sera Voss</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">68,410</div>
+                    </div>
+                    <div class="podium-num">2</div>
+                  </div>
+                </div>
+
+                <!-- 1st -->
+                <div class="podium-slot slot-1" data-title="The Ashen Crown" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <div class="podium-crown"><i class="fa-solid fa-crown"></i></div>
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">The Ashen Crown</div>
+                      <div class="podium-author">Alex Bedi</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">84,291</div>
+                    </div>
+                    <div class="podium-num">1</div>
+                  </div>
+                </div>
+
+                <!-- 3rd -->
+                <div class="podium-slot slot-3" data-title="The Last Saint" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="The Last Saint">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">The Last Saint</div>
+                      <div class="podium-author">N. K. Reyes</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">59,044</div>
+                    </div>
+                    <div class="podium-num">3</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="rank-list-wrap">
+              <div class="rank-list">
+
+                <div class="rank-row" data-title="A Court of Embers" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">04</span>
+                    <span class="rank-move up">▲ 1</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=200&auto=format&fit=crop" alt="A Court of Embers"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">A Court of Embers</div>
+                    <div class="rank-author">Lena Marsh</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">52,180</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="The Hollow Vow" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">05</span>
+                    <span class="rank-move new">NEW</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=200&auto=format&fit=crop" alt="The Hollow Vow"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">The Hollow Vow</div>
+                    <div class="rank-author">Ilya Fenn</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">47,221</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Salt & Sorrow" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">06</span>
+                    <span class="rank-move up">▲ 3</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=200&auto=format&fit=crop" alt="Salt & Sorrow"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Salt &amp; Sorrow</div>
+                    <div class="rank-author">Marisol Vega</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">44,802</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Necromancer's Debt" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">07</span>
+                    <span class="rank-move down">▼ 2</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop" alt="Necromancer's Debt"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Necromancer's Debt</div>
+                    <div class="rank-author">Kai Tanaka</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">41,055</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="The Wolf's Bride" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">08</span>
+                    <span class="rank-move up">▲ 4</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=200&auto=format&fit=crop" alt="The Wolf's Bride"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">The Wolf's Bride</div>
+                    <div class="rank-author">Astrid Lind</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">38,194</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Empire of Ash" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">09</span>
+                    <span class="rank-move new">NEW</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?q=80&w=200&auto=format&fit=crop" alt="Empire of Ash"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Empire of Ash</div>
+                    <div class="rank-author">D. C. Halloran</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">34,077</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="The Glass Throne" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">10</span>
+                    <span class="rank-move up">▲ 6</span>
+                  </div>
+                  <div class="rank-thumb"><img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=200&auto=format&fit=crop" alt="The Glass Throne"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">The Glass Throne</div>
+                    <div class="rank-author">Rin Okada</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">29,841</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- FEATURED BOOK BOX OFFICE -->
+          <div class="featured-wrap">
+            <div class="profile-card">
+              <div class="profile-kicker">Featured Book Box Office</div>
+
+              <div class="profile-header">
+                <div class="profile-cover">
+                  <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+                </div>
+                <div class="profile-meta">
+                  <div class="profile-name">The Ashen Crown</div>
+                  <div class="profile-byline">by Alex Bedi</div>
+                  <div class="profile-tags">
+                    <span class="profile-tag accent">The Ashborn Saga · Book 1</span>
+                    <span class="profile-tag">Epic Fantasy</span>
+                  </div>
+                  <div class="profile-tags">
+                    <span class="profile-tag gold"><i class="fa-solid fa-crown" style="font-size:8px;"></i> #1 This Season</span>
+                    <span class="profile-tag">#18 All Time</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="metrics-grid">
+                <div class="metric-cell">
+                  <span class="metric-label">Copies Sold</span>
+                  <span class="metric-value">84,291</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Readers</span>
+                  <span class="metric-value">126,402</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Reads</span>
+                  <span class="metric-value">842,190</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Favorites</span>
+                  <span class="metric-value">38,104</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Followers</span>
+                  <span class="metric-value">14,201</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Completion</span>
+                  <span class="metric-value">72<small>%</small></span>
+                </div>
+              </div>
+
+              <div class="period-strip">
+                <div class="period-cell">
+                  <span class="period-name">Today</span>
+                  <span class="period-value">183</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">Week</span>
+                  <span class="period-value">1,284</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">Month</span>
+                  <span class="period-value">6,812</span>
+                </div>
+                <div class="period-cell active">
+                  <span class="period-name">Season</span>
+                  <span class="period-value">28,420</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">All Time</span>
+                  <span class="period-value">842,190</span>
+                </div>
+              </div>
+
+              <div class="recognition-block">
+                <div class="recognition-row award">
+                  <div class="recognition-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">Best-Selling Book</span>
+                    <span class="recognition-sub">The Surge · 2027</span>
+                  </div>
+                </div>
+                <div class="recognition-row award">
+                  <div class="recognition-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">Breakthrough Book</span>
+                    <span class="recognition-sub">The Bloom · 2027</span>
+                  </div>
+                </div>
+                <div class="recognition-row record">
+                  <div class="recognition-icon red"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">4 Box Office Records</span>
+                    <span class="recognition-sub">Fastest to 10K · Most Reads in a Season · +2 more</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOOK AWARDS -->
+          <section class="section-block">
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Book Box Office Awards</h2>
+                <span class="section-subtitle">Generated from verified performance data · The Crown 2026</span>
+              </div>
+              <span class="section-action">View all <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+            <div class="awards-grid">
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="award-name">Best-Selling Book</div>
+                <div class="award-winner">The Ashen Crown</div>
+                <div class="award-sub">84,291 copies sold</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-book-open"></i></div>
+                <div class="award-name">Most Read Book</div>
+                <div class="award-winner">The Ashen Crown</div>
+                <div class="award-sub">842,190 reads</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="award-name">Breakout Book</div>
+                <div class="award-winner">The Hollow Vow</div>
+                <div class="award-sub">+412% reader growth</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-user-plus"></i></div>
+                <div class="award-name">Most Followed Book</div>
+                <div class="award-winner">A Court of Embers</div>
+                <div class="award-sub">48,204 followers</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-heart"></i></div>
+                <div class="award-name">Most Favorited Book</div>
+                <div class="award-winner">The Last Saint</div>
+                <div class="award-sub">52,108 favorites</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-rocket"></i></div>
+                <div class="award-name">Biggest Opening</div>
+                <div class="award-winner">Empire of Ash</div>
+                <div class="award-sub">128,410 reads in week 1</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- BOOK RECORDS -->
+          <section class="section-block">
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Book Box Office Records</h2>
+                <span class="section-subtitle">Permanent statistical achievements · Set recently</span>
+              </div>
+              <span class="section-action">All records <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+            <div class="records-list">
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon red"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Fastest to 100K Readers</span>
+                  <span class="record-holder">The Ashen Crown · Alex Bedi</span>
+                </div>
+                <span class="record-value">47 days</span>
+                <span class="record-date">Nov 12, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon red"><i class="fa-solid fa-fire"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most Reads in 24 Hours</span>
+                  <span class="record-holder">Empire of Ash · D. C. Halloran</span>
+                </div>
+                <span class="record-value">84,201</span>
+                <span class="record-date">Nov 08, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon gold"><i class="fa-solid fa-crown"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Largest Opening Week</span>
+                  <span class="record-holder">Empire of Ash · D. C. Halloran</span>
+                </div>
+                <span class="record-value">128,410</span>
+                <span class="record-date">Nov 04, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon green"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Fastest to 10K Copies Sold</span>
+                  <span class="record-holder">The Hollow Vow · Ilya Fenn</span>
+                </div>
+                <span class="record-value">19 days</span>
+                <span class="record-date">Oct 28, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon gold"><i class="fa-solid fa-ranking-star"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most Consecutive Weeks in Top 10</span>
+                  <span class="record-holder">The Ashen Crown · Alex Bedi</span>
+                </div>
+                <span class="record-value">14 weeks</span>
+                <span class="record-date">Oct 20, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon red"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Longest Box Office Run</span>
+                  <span class="record-holder">Dune · Frank Herbert</span>
+                </div>
+                <span class="record-value">34 weeks</span>
+                <span class="record-date">Sep 12, 2026</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- =========================================================
+             AUTHORS VIEW
+             ========================================================= -->
+        <div class="view" id="viewAuthors" hidden>
+
+          <div class="chart-panel">
+            <div class="podium-wrap">
+              <div class="podium">
+
+                <!-- 2nd -->
+                <div class="podium-slot is-author slot-2" data-title="Sera Voss" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" alt="Sera Voss">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">Sera Voss</div>
+                      <div class="podium-author">@seravoss · 5 books</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">198,204</div>
+                    </div>
+                    <div class="podium-num">2</div>
+                  </div>
+                </div>
+
+                <!-- 1st -->
+                <div class="podium-slot is-author slot-1" data-title="Alex Bedi" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <div class="podium-crown"><i class="fa-solid fa-crown"></i></div>
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" alt="Alex Bedi">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">Alex Bedi</div>
+                      <div class="podium-author">@alexbedi · 7 books</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">284,912</div>
+                    </div>
+                    <div class="podium-num">1</div>
+                  </div>
+                </div>
+
+                <!-- 3rd -->
+                <div class="podium-slot is-author slot-3" data-title="Madeline Cross" tabindex="0" role="button">
+                  <div class="podium-block">
+                    <div class="podium-book-wrap">
+                      <img class="podium-book" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Madeline Cross">
+                    </div>
+                    <div class="podium-info">
+                      <div class="podium-name">Madeline Cross</div>
+                      <div class="podium-author">@mcross · 4 books</div>
+                      <div class="podium-metric-label">Copies Sold</div>
+                      <div class="podium-copies">164,801</div>
+                    </div>
+                    <div class="podium-num">3</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="rank-list-wrap">
+              <div class="rank-list">
+
+                <div class="rank-row" data-title="Ilya Fenn" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">04</span>
+                    <span class="rank-move up">▲ 3</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop" alt="Ilya Fenn"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Ilya Fenn</div>
+                    <div class="rank-author">@ilyafenn · 3 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">142,890</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="N. K. Reyes" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">05</span>
+                    <span class="rank-move new">NEW</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt="N. K. Reyes"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">N. K. Reyes</div>
+                    <div class="rank-author">@nkreyes · 4 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">128,401</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Lena Marsh" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">06</span>
+                    <span class="rank-move up">▲ 1</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200&auto=format&fit=crop" alt="Lena Marsh"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Lena Marsh</div>
+                    <div class="rank-author">@lenamarsh · 6 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">118,920</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Marisol Vega" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">07</span>
+                    <span class="rank-move down">▼ 3</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=200&auto=format&fit=crop" alt="Marisol Vega"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Marisol Vega</div>
+                    <div class="rank-author">@marisolv · 3 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">104,512</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Kai Tanaka" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">08</span>
+                    <span class="rank-move up">▲ 2</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1507591064344-4c6ce005b128?q=80&w=200&auto=format&fit=crop" alt="Kai Tanaka"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Kai Tanaka</div>
+                    <div class="rank-author">@kaitanaka · 4 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">98,441</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Astrid Lind" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">09</span>
+                    <span class="rank-move new">NEW</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=200&auto=format&fit=crop" alt="Astrid Lind"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Astrid Lind</div>
+                    <div class="rank-author">@astridlind · 2 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">91,220</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+                <div class="rank-row" data-title="Rin Okada" tabindex="0" role="button">
+                  <div class="rank-pos-wrap">
+                    <span class="rank-pos">10</span>
+                    <span class="rank-move up">▲ 5</span>
+                  </div>
+                  <div class="rank-thumb is-avatar"><img src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?q=80&w=200&auto=format&fit=crop" alt="Rin Okada"></div>
+                  <div class="rank-info">
+                    <div class="rank-title">Rin Okada</div>
+                    <div class="rank-author">@rinokada · 5 books</div>
+                  </div>
+                  <div class="rank-value">
+                    <div class="rank-count">84,109</div>
+                    <div class="rank-label">copies</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- FEATURED AUTHOR BOX OFFICE -->
+          <div class="featured-wrap">
+            <div class="profile-card">
+              <div class="profile-kicker">Featured Author Box Office</div>
+
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" alt="Alex Bedi">
+                </div>
+                <div class="profile-meta">
+                  <div class="profile-name">Alex Bedi</div>
+                  <div class="profile-byline">@alexbedi · Verified Author</div>
+                  <div class="profile-tags">
+                    <span class="profile-tag accent">7 Books</span>
+                    <span class="profile-tag">3 Series</span>
+                  </div>
+                  <div class="profile-tags">
+                    <span class="profile-tag">#1 Books · 2</span>
+                    <span class="profile-tag">Top 10 Books · 5</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="metrics-grid">
+                <div class="metric-cell">
+                  <span class="metric-label">Copies Sold</span>
+                  <span class="metric-value">284,912</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Readers</span>
+                  <span class="metric-value">512,840</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Reads</span>
+                  <span class="metric-value">4.8<small>M</small></span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Followers</span>
+                  <span class="metric-value">82,104</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Favorites</span>
+                  <span class="metric-value">191,204</span>
+                </div>
+                <div class="metric-cell">
+                  <span class="metric-label">Avg. Comp.</span>
+                  <span class="metric-value">68<small>%</small></span>
+                </div>
+              </div>
+
+              <div class="period-strip">
+                <div class="period-cell">
+                  <span class="period-name">Today</span>
+                  <span class="period-value">1,204</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">Week</span>
+                  <span class="period-value">8,410</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">Month</span>
+                  <span class="period-value">31,204</span>
+                </div>
+                <div class="period-cell active">
+                  <span class="period-name">Season</span>
+                  <span class="period-value">128,419</span>
+                </div>
+                <div class="period-cell">
+                  <span class="period-name">All Time</span>
+                  <span class="period-value">4.8M</span>
+                </div>
+              </div>
+
+              <div class="recognition-block">
+                <div class="recognition-row award">
+                  <div class="recognition-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">Best-Selling Author</span>
+                    <span class="recognition-sub">The Surge · 2027</span>
+                  </div>
+                </div>
+                <div class="recognition-row award">
+                  <div class="recognition-icon gold"><i class="fa-solid fa-trophy"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">Breakthrough Author</span>
+                    <span class="recognition-sub">The Bloom · 2027</span>
+                  </div>
+                </div>
+                <div class="recognition-row record">
+                  <div class="recognition-icon red"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="recognition-body">
+                    <span class="recognition-title">6 Box Office Records</span>
+                    <span class="recognition-sub">Fastest to 100K Readers · Most Books in Top 10 · +4 more</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AUTHOR AWARDS -->
+          <section class="section-block">
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <h2 class="section-title"><i class="fa-solid fa-trophy"></i> Author Box Office Awards</h2>
+                <span class="section-subtitle">Generated from verified performance data · The Crown 2026</span>
+              </div>
+              <span class="section-action">View all <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+            <div class="awards-grid">
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="award-name">Best-Selling Author</div>
+                <div class="award-winner">Alex Bedi</div>
+                <div class="award-sub">284,912 copies sold</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-book-open"></i></div>
+                <div class="award-name">Most Read Author</div>
+                <div class="award-winner">Sera Voss</div>
+                <div class="award-sub">3.2M total reads</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-user-plus"></i></div>
+                <div class="award-name">Most Followed Author</div>
+                <div class="award-winner">Madeline Cross</div>
+                <div class="award-sub">142,108 followers</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="award-name">Breakthrough Author</div>
+                <div class="award-winner">Ilya Fenn</div>
+                <div class="award-sub">+658% reader growth</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-rocket"></i></div>
+                <div class="award-name">Most Successful Launch</div>
+                <div class="award-winner">Lena Marsh</div>
+                <div class="award-sub">A Court of Embers · 84,201 reads week 1</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+
+              <div class="award-card">
+                <div class="award-trophy"><i class="fa-solid fa-medal"></i></div>
+                <div class="award-name">Author of the Season</div>
+                <div class="award-winner">Alex Bedi</div>
+                <div class="award-sub">284,912 copies · 7 books</div>
+                <div class="award-season"><i class="fa-solid fa-crown"></i> The Crown · 2026</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- AUTHOR RECORDS -->
+          <section class="section-block">
+            <div class="section-header">
+              <div class="section-title-wrap">
+                <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Author Box Office Records</h2>
+                <span class="section-subtitle">Career-level statistical achievements · Set recently</span>
+              </div>
+              <span class="section-action">All records <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+            <div class="records-list">
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon red"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Fastest Author to 1M Reads</span>
+                  <span class="record-holder">Alex Bedi</span>
+                </div>
+                <span class="record-value">3 seasons</span>
+                <span class="record-date">Oct 15, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon gold"><i class="fa-solid fa-ranking-star"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most Books in Top 10</span>
+                  <span class="record-holder">Alex Bedi</span>
+                </div>
+                <span class="record-value">3 books</span>
+                <span class="record-date">Oct 01, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon gold"><i class="fa-solid fa-crown"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most #1 Box Office Books</span>
+                  <span class="record-holder">Alex Bedi</span>
+                </div>
+                <span class="record-value">2 books</span>
+                <span class="record-date">Sep 28, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon red"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Fastest Author to 100K Readers</span>
+                  <span class="record-holder">Sera Voss</span>
+                </div>
+                <span class="record-value">7 seasons</span>
+                <span class="record-date">Sep 14, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon green"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most Copies Sold in a Season</span>
+                  <span class="record-holder">Alex Bedi</span>
+                </div>
+                <span class="record-value">284,912</span>
+                <span class="record-date">Sep 01, 2026</span>
+              </div>
+
+              <div class="record-row" tabindex="0" role="button">
+                <div class="record-icon gold"><i class="fa-solid fa-calendar"></i></div>
+                <div class="record-info">
+                  <span class="record-title">Most Consecutive Seasonal Appearances</span>
+                  <span class="record-holder">Alex Bedi</span>
+                </div>
+                <span class="record-value">8 seasons</span>
+                <span class="record-date">Aug 22, 2026</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- SEASON ARCHIVE (shared) -->
+        <section class="section-block" style="margin-bottom: 0;">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-calendar"></i> Season Archive</h2>
+              <span class="section-subtitle">Four seasons · One year of Fictreon</span>
+            </div>
+            <span class="section-action">Full history <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+
+          <div class="season-history">
+            <div class="season-card">
+              <div class="season-card-name">The Rising</div>
+              <div class="season-card-dates">Jan — Mar 2026</div>
+              <div class="season-card-winner">
+                <span class="season-card-winner-label">Book of the Season</span>
+                <span class="season-card-winner-name"><i class="fa-solid fa-trophy"></i> Blood of Kings</span>
+              </div>
+            </div>
+
+            <div class="season-card">
+              <div class="season-card-name">The Bloom</div>
+              <div class="season-card-dates">Apr — Jun 2026</div>
+              <div class="season-card-winner">
+                <span class="season-card-winner-label">Book of the Season</span>
+                <span class="season-card-winner-name"><i class="fa-solid fa-trophy"></i> The Last Saint</span>
+              </div>
+            </div>
+
+            <div class="season-card">
+              <div class="season-card-name">The Surge</div>
+              <div class="season-card-dates">Jul — Sep 2026</div>
+              <div class="season-card-winner">
+                <span class="season-card-winner-label">Book of the Season</span>
+                <span class="season-card-winner-name"><i class="fa-solid fa-trophy"></i> The Ashen Crown</span>
+              </div>
+            </div>
+
+            <div class="season-card current">
+              <div class="season-card-name">The Crown <span class="live-dot"></span></div>
+              <div class="season-card-dates">Oct — Dec 2026 · Live</div>
+              <div class="season-card-winner">
+                <span class="season-card-winner-label">Current Leader</span>
+                <span class="season-card-winner-name"><i class="fa-solid fa-crown"></i> The Ashen Crown</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Box Office</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-trophy"></i>
+      <span>Awards</span>
+    </a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    /* ========== ENTITY TOGGLE — swaps entire view ========== */
+    const viewBooks   = document.getElementById('viewBooks');
+    const viewAuthors = document.getElementById('viewAuthors');
+
+    function setEntity(entity) {
+      document.querySelectorAll('#entityToggle .entity-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.entity === entity);
+      });
+
+      if (entity === 'authors') {
+        viewBooks.hidden = true;
+        viewAuthors.hidden = false;
+      } else {
+        viewBooks.hidden = false;
+        viewAuthors.hidden = true;
+      }
+
+      // Reveal sections in the newly visible view immediately
+      requestAnimationFrame(() => {
+        const activeView = entity === 'authors' ? viewAuthors : viewBooks;
+        const vh = window.innerHeight || document.documentElement.clientHeight;
+        activeView.querySelectorAll('.section-block').forEach(s => {
+          const rect = s.getBoundingClientRect();
+          if (rect.top < vh * 0.95) s.classList.add('in-view');
+        });
+      });
+    }
+
+    document.querySelectorAll('#entityToggle .entity-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entity = btn.dataset.entity;
+        setEntity(entity);
+        showToast('Showing ' + entity);
+      });
+    });
+
+    /* Period tabs */
+    document.querySelectorAll('#periodTabs .period-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#periodTabs .period-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        showToast('Period: ' + tab.textContent.trim());
+      });
+    });
+
+    /* Category pills */
+    document.querySelectorAll('#categoryPills .category-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#categoryPills .category-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        showToast('Ranking by ' + pill.textContent.trim());
+      });
+    });
+
+    /* Period cells inside featured cards */
+    document.querySelectorAll('.period-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const parent = cell.closest('.period-strip');
+        if (!parent) return;
+        parent.querySelectorAll('.period-cell').forEach(c => c.classList.remove('active'));
+        cell.classList.add('active');
+      });
+    });
+
+    /* Clickable cards */
+    function bindClick(el, label) {
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('click', () => showToast('Opening “' + label + '”'));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+      });
+    }
+    document.querySelectorAll('.podium-slot').forEach(s => bindClick(s, s.dataset.title));
+    document.querySelectorAll('.rank-row').forEach(r => bindClick(r, r.dataset.title));
+    document.querySelectorAll('.award-card').forEach(c => {
+      const w = c.querySelector('.award-winner');
+      bindClick(c, w ? w.textContent.trim() : 'award');
+    });
+    document.querySelectorAll('.record-row').forEach(r => {
+      const t = r.querySelector('.record-title');
+      bindClick(r, t ? t.textContent.trim() : 'record');
+    });
+    document.querySelectorAll('.season-card').forEach(s => {
+      const n = s.querySelector('.season-card-name');
+      bindClick(s, n ? n.textContent.trim() : 'season');
+    });
+
+    /* Mobile bottom nav */
+    document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+      });
+    });
+
+    /* Sidebar */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    /* Scroll reveal */
+    (function initScrollReveal() {
+      const sections = document.querySelectorAll('.section-block');
+      if (!sections.length) return;
+      const viewportH = window.innerHeight || document.documentElement.clientHeight;
+      sections.forEach((s) => {
+        const rect = s.getBoundingClientRect();
+        if (rect.top < viewportH * 0.92 && !s.closest('[hidden]')) s.classList.add('in-view');
+      });
+      document.body.classList.add('reveal-ready');
+      if (!('IntersectionObserver' in window)) {
+        sections.forEach((s) => s.classList.add('in-view'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.06, rootMargin: '0px 0px -60px 0px' });
+      sections.forEach((s) => {
+        if (!s.classList.contains('in-view')) observer.observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>

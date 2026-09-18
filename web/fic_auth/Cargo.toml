@@ -1,0 +1,6 @@
+[package]
+name = "fic_auth"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

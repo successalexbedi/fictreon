@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Sign Up</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --up: #22C55E;
+      --warn: #F4B942;
+      --down: #EF4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html, body {
+      width: 100%; min-height: 100vh;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .auth-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-shell::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%;
+      transform: translateX(-50%);
+      width: 720px; height: 620px;
+      background: radial-gradient(ellipse, rgba(200, 16, 46, 0.09) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .auth-logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 3px;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 36px;
+    }
+    .auth-logo span { color: var(--accent); }
+
+    /* =========================================================
+       HERO — honeycomb background + text on top
+       ========================================================= */
+    .auth-hero {
+      position: relative;
+      width: 100%;
+      max-width: 640px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 40px 24px;
+      margin: 0 auto 36px;
+      border-radius: 24px;
+      animation: fadeUp 0.7s cubic-bezier(0.22, 0.7, 0.4, 1) backwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Honeycomb layer — absolute, fills hero */
+    .honeycomb-bg {
+      position: absolute;
+      inset: -30px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hc-row {
+      display: flex;
+      gap: 8px;
+      margin-top: -38px;
+      flex-shrink: 0;
+    }
+    .hc-row:first-child { margin-top: 0; }
+
+    .hc-hex {
+      width: 130px;
+      height: 150px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      overflow: hidden;
+      background: #0a0a0a;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .hc-hex img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.55) saturate(0.9);
+    }
+
+    /* Scrim — darkest in the center so text is readable */
+    .hero-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 70% 60% at 50% 50%,
+        rgba(11, 12, 16, 0.92) 0%,
+        rgba(11, 12, 16, 0.78) 35%,
+        rgba(11, 12, 16, 0.42) 70%,
+        rgba(11, 12, 16, 0.2) 100%
+      );
+    }
+
+    /* Text content on top */
+    .auth-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 420px;
+    }
+
+    .hero-kicker {
+      font-size: 11px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .hero-kicker .red-bar {
+      width: 3px;
+      height: 12px;
+      background-color: var(--accent);
+      border-radius: 1px;
+    }
+
+    .hero-title {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.05;
+      margin-bottom: 14px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-sub {
+      font-size: 13.5px;
+      color: #b0b1b6;
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto;
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* =========================================================
+       FORM
+       ========================================================= */
+    .auth-form {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.7s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+
+    .social-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .social-btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 13px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .social-btn:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      color: var(--text-muted);
+      font-size: 10.5px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .field-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .field-label .hint {
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      text-transform: none;
+      font-size: 10px;
+      opacity: 0.7;
+    }
+    .field-wrap { position: relative; }
+    .field-wrap > i {
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+    .field-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 14px 16px 14px 44px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+    .field-input:hover { border-color: rgba(255, 255, 255, 0.1); }
+    .field-input:focus { border-color: rgba(200, 16, 46, 0.55); }
+    .field-wrap:focus-within > i { color: var(--accent-bright); }
+
+    .field-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: none; border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s;
+    }
+    .field-toggle:hover { color: var(--text-main); }
+
+    .strength {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      position: relative;
+    }
+    .strength-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.35s ease, background 0.35s ease;
+    }
+    .strength[data-level="1"] .strength-bar:nth-child(-n+1)::after { background: var(--down); transform: scaleX(1); }
+    .strength[data-level="2"] .strength-bar:nth-child(-n+2)::after { background: var(--warn); transform: scaleX(1); }
+    .strength[data-level="3"] .strength-bar:nth-child(-n+3)::after { background: var(--up); transform: scaleX(1); }
+    .strength[data-level="4"] .strength-bar::after { background: var(--up); transform: scaleX(1); }
+    .strength-label {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      min-width: 62px;
+      text-align: right;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .check-row input { display: none; }
+    .checkbox {
+      width: 18px; height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all 0.2s;
+    }
+    .check-row input:checked + .checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .checkbox i {
+      font-size: 9px;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .check-row input:checked + .checkbox i { opacity: 1; }
+    .check-text {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .check-text a {
+      color: var(--accent-bright);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .check-text a:hover { text-decoration: underline; }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 15px 24px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 10px;
+      transition: background 0.2s, transform 0.15s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.2px;
+    }
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -120%;
+      width: 55%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+      transition: left 0.7s ease;
+      pointer-events: none;
+    }
+    .submit-btn:hover:not(:disabled) { background: #a50c24; transform: translateY(-1px); }
+    .submit-btn:hover:not(:disabled)::before { left: 140%; }
+    .submit-btn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .submit-btn i { font-size: 12px; }
+
+    .auth-foot {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .auth-foot a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 4px;
+      transition: color 0.2s;
+    }
+    .auth-foot a:hover { color: var(--accent-bright); }
+
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid rgba(200, 16, 46, 0.38);
+      color: var(--text-main);
+      font-size: 12px; font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      z-index: 2000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 24px rgba(200, 16, 46, 0.28);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .auth-shell { padding: 32px 16px 48px; }
+      .auth-logo { margin-bottom: 28px; }
+
+      .auth-hero {
+        min-height: 440px;
+        padding: 32px 20px;
+        border-radius: 20px;
+      }
+      .honeycomb-bg { inset: -20px 0; }
+      .hc-row { gap: 6px; margin-top: -27px; }
+      .hc-hex { width: 92px; height: 106px; }
+
+      .hero-title { font-size: 30px; letter-spacing: -0.6px; }
+      .hero-sub { font-size: 12.5px; max-width: 300px; }
+    }
+
+    @media (max-width: 380px) {
+      .hero-title { font-size: 26px; }
+      .hc-row { gap: 5px; margin-top: -23px; }
+      .hc-hex { width: 78px; height: 90px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-shell">
+
+    <div class="auth-logo">NOVEL<span>IX</span></div>
+
+    <!-- HERO -->
+    <section class="auth-hero">
+      <div class="honeycomb-bg" aria-hidden="true">
+        <!-- Row 1: 4 hexes -->
+        <div class="hc-row">
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop" alt=""></div>
+        </div>
+        <!-- Row 2: 3 hexes -->
+        <div class="hc-row">
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1507591064344-4c6ce005b128?q=80&w=300&auto=format&fit=crop" alt=""></div>
+        </div>
+        <!-- Row 3: 4 hexes -->
+        <div class="hc-row">
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop" alt=""></div>
+        </div>
+        <!-- Row 4: 3 hexes -->
+        <div class="hc-row">
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=300&auto=format&fit=crop" alt=""></div>
+          <div class="hc-hex"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop" alt=""></div>
+        </div>
+      </div>
+
+      <div class="hero-scrim"></div>
+
+      <div class="auth-hero-content">
+        <div class="hero-kicker">
+          <span class="red-bar"></span>
+          Welcome to Novelix
+        </div>
+        <h1 class="hero-title">Join the story</h1>
+        <p class="hero-sub">Create your account and start building the library you've always wanted.</p>
+      </div>
+    </section>
+
+    <!-- FORM -->
+    <div class="auth-form">
+
+      <div class="social-row">
+        <button class="social-btn" data-provider="Google" type="button"><i class="fa-brands fa-google"></i></button>
+        <button class="social-btn" data-provider="Apple" type="button"><i class="fa-brands fa-apple"></i></button>
+        <button class="social-btn" data-provider="Discord" type="button"><i class="fa-brands fa-discord"></i></button>
+      </div>
+
+      <div class="divider">or sign up with email</div>
+
+      <div class="field-group">
+        <label class="field-label" for="username">
+          Username <span class="hint">Required</span>
+        </label>
+        <div class="field-wrap">
+          <i class="fa-regular fa-user"></i>
+          <input class="field-input" id="username" type="text" placeholder="yourhandle" autocomplete="username" maxlength="24">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="email">
+          Email <span class="hint">Required</span>
+        </label>
+        <div class="field-wrap">
+          <i class="fa-regular fa-envelope"></i>
+          <input class="field-input" id="email" type="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="password">
+          Password <span class="hint">8+ characters</span>
+        </label>
+        <div class="field-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input class="field-input" id="password" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:48px;">
+          <button class="field-toggle" type="button" data-toggle="password" aria-label="Show password">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        <div class="strength" id="strength" data-level="0">
+          <div class="strength-bar"></div>
+          <div class="strength-bar"></div>
+          <div class="strength-bar"></div>
+          <div class="strength-bar"></div>
+          <span class="strength-label" id="strengthLabel">—</span>
+        </div>
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" id="terms">
+        <span class="checkbox"><i class="fa-solid fa-check"></i></span>
+        <span class="check-text">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</span>
+      </label>
+
+      <button class="submit-btn" id="submitBtn" type="button" disabled>
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Create Account
+      </button>
+
+      <div class="auth-foot">
+        Already a member?<a href="login.html">Log in</a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    document.querySelectorAll('.field-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.toggle);
+        const icon = btn.querySelector('i');
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+
+    const passwordInput = document.getElementById('password');
+    const strength = document.getElementById('strength');
+    const strengthLabel = document.getElementById('strengthLabel');
+    const strengthNames = ['—', 'Weak', 'Fair', 'Good', 'Strong'];
+
+    passwordInput.addEventListener('input', () => {
+      const val = passwordInput.value;
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+      if (/\d/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      if (val.length === 0) score = 0;
+      strength.dataset.level = score;
+      strengthLabel.textContent = strengthNames[score] || '—';
+      validate();
+    });
+
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const termsInput = document.getElementById('terms');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function validate() {
+      const validUsername = usernameInput.value.trim().length >= 3;
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+      const validPassword = passwordInput.value.length >= 8;
+      const validTerms = termsInput.checked;
+      submitBtn.disabled = !(validUsername && validEmail && validPassword && validTerms);
+    }
+
+    usernameInput.addEventListener('input', validate);
+    emailInput.addEventListener('input', validate);
+    termsInput.addEventListener('change', validate);
+
+    document.querySelectorAll('.social-btn').forEach(btn => {
+      btn.addEventListener('click', () => showToast('Continue with ' + btn.dataset.provider + '…'));
+    });
+
+    submitBtn.addEventListener('click', () => {
+      showToast('Creating your account…');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Collection</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-deep: #8B0A1F;
+      --accent-bright: #E63946;
+      --up: #22C55E;
+      --gold: #F4B942;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 3px;
+      cursor: pointer;
+    }
+    .logo span {
+      color: var(--accent);
+      display: inline-block;
+      animation: logoPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { text-shadow: 0 0 0 rgba(200, 16, 46, 0); }
+      50%      { text-shadow: 0 0 20px rgba(200, 16, 46, 0.7); }
+    }
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      width: 3px; height: 60%;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0);
+      transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      cursor: pointer;
+      text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main);
+      color: var(--bg-base);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* MOBILE HEADER */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .menu-toggle:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-active); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 950;
+    }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      gap: 4px;
+      flex: 1; height: 100%;
+      position: relative;
+      transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* MAIN WRAPPER */
+    .main-content-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 48px 80px;
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* BACK LINK */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 32px 0 20px;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .back-link:hover { color: var(--text-main); }
+    .back-link i { font-size: 11px; transition: transform 0.2s; }
+    .back-link:hover i { transform: translateX(-3px); }
+
+    /* HERO */
+    .hero {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      align-items: flex-end;
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      animation: heroEnter 0.7s cubic-bezier(0.22, 0.7, 0.4, 1) backwards;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200, 16, 46, 0.4), rgba(200, 16, 46, 0) 40%);
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-cover {
+      width: 240px;
+      height: 240px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 1px;
+      background: #050505;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .hero-cover-cell { overflow: hidden; background: #0a0a0a; }
+    .hero-cover-cell img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.9);
+    }
+    .hero-cover-cell.empty {
+      background: linear-gradient(135deg, #181820 0%, #0d0d12 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 18px;
+      opacity: 0.3;
+    }
+    .hero-cover-more {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      background: rgba(11, 12, 16, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      letter-spacing: 0.3px;
+      z-index: 2;
+    }
+
+    .hero-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+      padding-bottom: 4px;
+    }
+
+    .hero-kicker {
+      font-size: 10px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-kicker::before {
+      content: '';
+      width: 3px; height: 10px;
+      background: var(--accent);
+      border-radius: 1px;
+    }
+    .hero-visibility {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 9.5px;
+      letter-spacing: 1px;
+      margin-left: 4px;
+    }
+    .hero-visibility i { font-size: 8px; }
+
+    .hero-name {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.08;
+      color: #fff;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      max-width: 620px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 6px;
+    }
+    .hero-meta-owner {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+    .hero-meta-owner-avatar {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      flex-shrink: 0;
+    }
+    .hero-meta-owner-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-meta .dot {
+      width: 3px; height: 3px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 8px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      flex-wrap: wrap;
+    }
+    .hero-stats strong {
+      color: var(--text-main);
+      font-weight: 700;
+      font-feature-settings: 'tnum';
+      margin-right: 3px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background-color: var(--text-main);
+      color: var(--bg-base);
+      border: none;
+      padding: 11px 24px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -120%;
+      width: 55%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent);
+      transition: left 0.65s ease;
+      pointer-events: none;
+    }
+    .btn-primary:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn-primary:hover::before { left: 140%; }
+    .btn-primary i { font-size: 12px; }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      font-family: inherit;
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-active);
+      transform: translateY(-1px);
+    }
+    .btn-ghost i { font-size: 12px; }
+
+    .btn-icon {
+      width: 40px; height: 40px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-active);
+      color: var(--text-main);
+    }
+    .btn-icon i { font-size: 13px; }
+
+    /* TRACK LIST */
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 12px;
+    }
+
+    /* 8 columns: #, cover, title, rating, copies, read time, awards, more */
+    .track-head,
+    .track-row {
+      display: grid;
+      grid-template-columns: 44px 52px 1fr 70px 110px 100px 90px 32px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .track-head {
+      padding: 8px 12px 12px 12px;
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 6px;
+    }
+    .track-head .right { text-align: right; }
+    .track-head .center { text-align: center; }
+
+    .track-row {
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.18s ease;
+      background: none;
+      border: none;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+      position: relative;
+    }
+    .track-row:hover { background: rgba(255, 255, 255, 0.03); }
+    .track-row:active { background: rgba(255, 255, 255, 0.05); }
+
+    .track-num {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-feature-settings: 'tnum';
+      text-align: center;
+      letter-spacing: -0.3px;
+      transition: color 0.2s;
+    }
+    .track-row:hover .track-num { color: var(--text-main); }
+
+    .track-cover {
+      width: 52px;
+      height: 52px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .track-cover img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.92);
+    }
+    .track-cover-play {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 12, 16, 0.7);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 2;
+    }
+    .track-row:hover .track-cover-play { opacity: 1; }
+
+    .track-info {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .track-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.1px;
+    }
+    .track-author-line {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .track-author-line .genre-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      letter-spacing: 0.2px;
+      flex-shrink: 0;
+    }
+
+    .track-rating {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      font-feature-settings: 'tnum';
+    }
+    .track-rating i { font-size: 10px; color: var(--gold); }
+
+    .track-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1px;
+      font-feature-settings: 'tnum';
+    }
+    .track-stat-value {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+    .track-stat-label {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Awards column */
+    .track-awards {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .award-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(244, 185, 66, 0.1);
+      border: 1px solid rgba(244, 185, 66, 0.28);
+      color: var(--gold);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .award-badge i { font-size: 9px; }
+    .award-badge.empty {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: var(--border-subtle);
+      color: var(--text-muted);
+      font-weight: 500;
+      opacity: 0.55;
+    }
+    .award-badge.empty i { opacity: 0.5; }
+
+    .track-more {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: inherit;
+      opacity: 0;
+    }
+    .track-row:hover .track-more { opacity: 1; }
+    .track-more:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+    }
+    .track-more i { font-size: 14px; }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1900;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.show { display: flex; opacity: 1; }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-active);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+    .modal-backdrop.show .modal { transform: translateY(0) scale(1); }
+
+    .modal-close {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: var(--border-active);
+    }
+    .modal-close i { font-size: 12px; }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .modal-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 24px;
+    }
+
+    .modal-cover-preview {
+      width: 100%;
+      height: 130px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: transparent;
+      border: 1.5px dashed rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .modal-cover-preview:hover {
+      border-color: rgba(200, 16, 46, 0.55);
+      background: rgba(200, 16, 46, 0.03);
+    }
+    .modal-cover-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-bright);
+      font-size: 16px;
+    }
+    .modal-cover-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+    .modal-cover-text strong {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .modal-cover-text span {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .form-label .optional {
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: none;
+      font-size: 10.5px;
+      opacity: 0.7;
+    }
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: rgba(11, 12, 16, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 11px 14px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      resize: none;
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: rgba(200, 16, 46, 0.6);
+      background: rgba(11, 12, 16, 0.9);
+    }
+    .form-textarea { min-height: 84px; line-height: 1.5; }
+
+    .visibility-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .visibility-option {
+      background: rgba(11, 12, 16, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
+      font-family: inherit;
+      color: inherit;
+      text-align: left;
+    }
+    .visibility-option:hover { border-color: var(--border-active); }
+    .visibility-option.active {
+      border-color: rgba(200, 16, 46, 0.6);
+      background: rgba(200, 16, 46, 0.06);
+    }
+    .visibility-option-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .visibility-option.active .visibility-option-icon {
+      background: rgba(200, 16, 46, 0.12);
+      border-color: rgba(200, 16, 46, 0.4);
+      color: var(--accent-bright);
+    }
+    .visibility-option-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .visibility-option-text strong {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .visibility-option-text span {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .modal-btn-cancel {
+      background: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .modal-btn-cancel:hover { color: var(--text-main); border-color: var(--border-active); }
+
+    .modal-btn-create {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .modal-btn-create:hover { background: #a50c24; }
+    .modal-btn-create:active { transform: scale(0.97); }
+    .modal-btn-create i { font-size: 11px; }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid rgba(200, 16, 46, 0.38);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      max-width: calc(100vw - 40px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 24px rgba(200, 16, 46, 0.28);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+
+      .content-inner { padding: 0 20px 60px; }
+
+      .hero { grid-template-columns: 180px 1fr; gap: 22px; }
+      .hero-cover { width: 180px; height: 180px; border-radius: 14px; }
+      .hero-name { font-size: 30px; }
+
+      .track-head { display: none; }
+
+      .track-row {
+        grid-template-columns: 32px 48px 1fr 32px;
+        gap: 12px;
+        padding: 8px 10px;
+      }
+
+      .track-rating,
+      .track-stat,
+      .track-awards { display: none; }
+
+      .track-cover { width: 48px; height: 48px; }
+      .track-title { font-size: 13px; }
+      .track-author-line { font-size: 11.5px; }
+      .track-author-line .genre-pill { font-size: 9.5px; padding: 1px 6px; }
+      .track-more { opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+      .back-link { padding: 22px 0 16px; }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        align-items: flex-start;
+        padding-bottom: 26px;
+      }
+      .hero-cover {
+        width: 140px;
+        height: 140px;
+        border-radius: 12px;
+      }
+      .hero-cover-cell.empty { font-size: 14px; }
+      .hero-cover-more { font-size: 10px; padding: 4px 8px; }
+      .hero-name { font-size: 26px; letter-spacing: -0.6px; }
+      .hero-desc { font-size: 12px; }
+      .hero-stats { font-size: 11.5px; gap: 14px; }
+      .hero-meta { font-size: 11.5px; }
+
+      /* Four equal pill buttons */
+      .hero-actions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .btn-primary,
+      .btn-ghost,
+      .btn-icon {
+        width: 100%;
+        height: 44px;
+        min-width: 0;
+        padding: 0;
+        border-radius: 999px;
+        justify-content: center;
+        gap: 0;
+        flex-shrink: 1;
+      }
+      .btn-primary .btn-text,
+      .btn-ghost .btn-text {
+        display: none;
+      }
+      .btn-primary i,
+      .btn-ghost i,
+      .btn-icon i {
+        font-size: 14px;
+      }
+
+      .track-list { margin-top: 8px; }
+      .track-row {
+        grid-template-columns: 44px 1fr 32px;
+        gap: 12px;
+        padding: 8px;
+      }
+      .track-num { display: none; }
+      .track-cover { width: 44px; height: 44px; border-radius: 6px; }
+      .track-title { font-size: 12.5px; }
+      .track-author-line { font-size: 11px; gap: 6px; }
+
+      .modal { padding: 22px; border-radius: 16px; }
+      .modal-title { font-size: 19px; }
+      .modal-sub { font-size: 12px; margin-bottom: 18px; }
+      .visibility-row { grid-template-columns: 1fr; }
+      .modal-actions { gap: 8px; margin-top: 20px; padding-top: 16px; }
+      .modal-btn-cancel,
+      .modal-btn-create { font-size: 12px; padding: 9px 16px; }
+    }
+
+    @media (max-width: 380px) {
+      .hero-cover { width: 120px; height: 120px; }
+      .hero-name { font-size: 22px; }
+      .hero-actions { gap: 6px; }
+      .btn-primary,
+      .btn-ghost,
+      .btn-icon { height: 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-layer-group"></i> Series</a>
+          <a href="#"><i class="fa-solid fa-compass"></i> New &amp; Popular</a>
+          <a href="#" class="active"><i class="fa-solid fa-bookmark"></i> Collections</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <button class="back-link" id="backLink">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back to Collections
+        </button>
+
+        <div class="hero">
+
+          <div class="hero-cover">
+            <div class="hero-cover-cell"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt=""></div>
+            <div class="hero-cover-cell"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt=""></div>
+            <div class="hero-cover-cell"><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" alt=""></div>
+            <div class="hero-cover-cell"><img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt=""></div>
+            <div class="hero-cover-more">+14 more</div>
+          </div>
+
+          <div class="hero-info">
+            <div class="hero-kicker">
+              Collection
+              <span class="hero-visibility"><i class="fa-solid fa-lock"></i> PRIVATE</span>
+            </div>
+
+            <h1 class="hero-name" id="collectionTitle">Favorites of 2026</h1>
+
+            <p class="hero-desc">The books that stayed with me this year — the ones I keep coming back to. Fantasy epics, quiet thrillers, and a few that surprised me.</p>
+
+            <div class="hero-meta">
+              <span class="hero-meta-owner">
+                <span class="hero-meta-owner-avatar">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop" alt="">
+                </span>
+                You
+              </span>
+              <span class="dot"></span>
+              <span>Updated 2 days ago</span>
+            </div>
+
+            <div class="hero-stats">
+              <span><strong>18</strong> books</span>
+              <span><strong>412K</strong> copies sold</span>
+              <span><strong>4.4</strong> avg rating</span>
+            </div>
+
+            <div class="hero-actions">
+              <button class="btn-primary" id="startReading">
+                <i class="fa-solid fa-play"></i>
+                <span class="btn-text">Start Reading</span>
+              </button>
+              <button class="btn-ghost" id="addBooks">
+                <i class="fa-solid fa-plus"></i>
+                <span class="btn-text">Add Books</span>
+              </button>
+              <button class="btn-icon" aria-label="Share" id="shareBtn">
+                <i class="fa-solid fa-share-nodes"></i>
+              </button>
+              <button class="btn-icon" aria-label="More options" id="moreBtn">
+                <i class="fa-solid fa-ellipsis"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="track-head">
+          <span class="center">#</span>
+          <span></span>
+          <span>Title</span>
+          <span class="center">Rating</span>
+          <span class="right">Copies Sold</span>
+          <span class="right">Read Time</span>
+          <span class="right">Awards</span>
+          <span></span>
+        </div>
+
+        <div class="track-list">
+
+          <div class="track-row" data-title="The Ashen Crown" tabindex="0" role="button">
+            <span class="track-num">01</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">The Ashen Crown</div>
+              <div class="track-author-line">
+                Alex Bedi
+                <span class="genre-pill">Epic Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.8</div>
+            <div class="track-stat">
+              <span class="track-stat-value">84,291</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 14m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 4</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="The Last Saint" tabindex="0" role="button">
+            <span class="track-num">02</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">The Last Saint</div>
+              <div class="track-author-line">
+                N. K. Reyes
+                <span class="genre-pill">Dark Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.6</div>
+            <div class="track-stat">
+              <span class="track-stat-value">59,044</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">3h 02m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 2</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="Blood of Kings" tabindex="0" role="button">
+            <span class="track-num">03</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">Blood of Kings</div>
+              <div class="track-author-line">
+                Sera Voss
+                <span class="genre-pill">Epic Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.7</div>
+            <div class="track-stat">
+              <span class="track-stat-value">68,410</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 48m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 3</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="A Court of Embers" tabindex="0" role="button">
+            <span class="track-num">04</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">A Court of Embers</div>
+              <div class="track-author-line">
+                Lena Marsh
+                <span class="genre-pill">Romantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.4</div>
+            <div class="track-stat">
+              <span class="track-stat-value">52,180</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">4h 12m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge empty"><i class="fa-solid fa-trophy"></i> —</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="The Hollow Vow" tabindex="0" role="button">
+            <span class="track-num">05</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">The Hollow Vow</div>
+              <div class="track-author-line">
+                Ilya Fenn
+                <span class="genre-pill">Mystery</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.5</div>
+            <div class="track-stat">
+              <span class="track-stat-value">47,221</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 06m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 1</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="Necromancer's Debt" tabindex="0" role="button">
+            <span class="track-num">06</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">Necromancer's Debt</div>
+              <div class="track-author-line">
+                Kai Tanaka
+                <span class="genre-pill">Dark Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.3</div>
+            <div class="track-stat">
+              <span class="track-stat-value">41,055</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">3h 20m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge empty"><i class="fa-solid fa-trophy"></i> —</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="Salt & Sorrow" tabindex="0" role="button">
+            <span class="track-num">07</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">Salt &amp; Sorrow</div>
+              <div class="track-author-line">
+                Marisol Vega
+                <span class="genre-pill">Literary</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.6</div>
+            <div class="track-stat">
+              <span class="track-stat-value">44,802</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 34m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 2</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="Empire of Ash" tabindex="0" role="button">
+            <span class="track-num">08</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">Empire of Ash</div>
+              <div class="track-author-line">
+                D. C. Halloran
+                <span class="genre-pill">Sci-Fi</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.2</div>
+            <div class="track-stat">
+              <span class="track-stat-value">34,077</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">3h 48m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge empty"><i class="fa-solid fa-trophy"></i> —</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="The Wolf's Bride" tabindex="0" role="button">
+            <span class="track-num">09</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">The Wolf's Bride</div>
+              <div class="track-author-line">
+                Astrid Lind
+                <span class="genre-pill">Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.5</div>
+            <div class="track-stat">
+              <span class="track-stat-value">38,194</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 52m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge"><i class="fa-solid fa-trophy"></i> 1</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+          <div class="track-row" data-title="The Glass Throne" tabindex="0" role="button">
+            <span class="track-num">10</span>
+            <div class="track-cover">
+              <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=200&auto=format&fit=crop" alt="">
+              <div class="track-cover-play"><i class="fa-solid fa-book-open"></i></div>
+            </div>
+            <div class="track-info">
+              <div class="track-title">The Glass Throne</div>
+              <div class="track-author-line">
+                Rin Okada
+                <span class="genre-pill">Epic Fantasy</span>
+              </div>
+            </div>
+            <div class="track-rating"><i class="fa-solid fa-star"></i> 4.4</div>
+            <div class="track-stat">
+              <span class="track-stat-value">29,841</span>
+              <span class="track-stat-label">Copies</span>
+            </div>
+            <div class="track-stat">
+              <span class="track-stat-value">2h 40m</span>
+              <span class="track-stat-label">Read Time</span>
+            </div>
+            <div class="track-awards">
+              <span class="award-badge empty"><i class="fa-solid fa-trophy"></i> —</span>
+            </div>
+            <button class="track-more" aria-label="More options"><i class="fa-solid fa-ellipsis"></i></button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-compass"></i>
+      <span>New</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+  </nav>
+
+  <div class="modal-backdrop" id="createModalBackdrop">
+    <div class="modal" id="createModal">
+
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <h2 class="modal-title">New Collection</h2>
+      <p class="modal-sub">Give it a name, add a note, and choose who can see it.</p>
+
+      <button class="modal-cover-preview" id="coverPicker" type="button">
+        <div class="modal-cover-icon"><i class="fa-solid fa-image"></i></div>
+        <div class="modal-cover-text">
+          <strong>Add a cover</strong>
+          <span>Auto-generated from books if empty</span>
+        </div>
+      </button>
+
+      <div class="form-group">
+        <label class="form-label" for="collectionName">Collection Name</label>
+        <input class="form-input" id="collectionName" type="text" placeholder="e.g. Winter Reading List" maxlength="60">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="collectionDesc">
+          Description
+          <span class="optional">Optional</span>
+        </label>
+        <textarea class="form-textarea" id="collectionDesc" placeholder="What ties these books together?" maxlength="240"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Visibility</label>
+        <div class="visibility-row">
+          <button class="visibility-option active" data-visibility="private" type="button">
+            <span class="visibility-option-icon"><i class="fa-solid fa-lock"></i></span>
+            <span class="visibility-option-text">
+              <strong>Private</strong>
+              <span>Only you can see it</span>
+            </span>
+          </button>
+          <button class="visibility-option" data-visibility="public" type="button">
+            <span class="visibility-option-icon"><i class="fa-solid fa-globe"></i></span>
+            <span class="visibility-option-text">
+              <strong>Public</strong>
+              <span>Anyone on Novelix</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="modalCancel" type="button">Cancel</button>
+        <button class="modal-btn-create" id="modalCreate" type="button">
+          <i class="fa-solid fa-plus"></i> Create Collection
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    (function loadCollectionFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      if (name) {
+        document.getElementById('collectionTitle').textContent = name;
+        document.title = 'Novelix - ' + name;
+      }
+    })();
+
+    document.getElementById('backLink').addEventListener('click', () => {
+      window.location.href = 'collections.html';
+    });
+
+    document.getElementById('startReading').addEventListener('click', () => {
+      showToast('Starting collection from book 01…');
+    });
+    document.getElementById('addBooks').addEventListener('click', () => {
+      showToast('Opening book picker…');
+    });
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      showToast('Share link copied');
+    });
+    document.getElementById('moreBtn').addEventListener('click', () => {
+      showToast('More options');
+    });
+
+    document.querySelectorAll('.track-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.track-more')) return;
+        showToast('Opening “' + row.dataset.title + '”');
+      });
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          row.click();
+        }
+      });
+    });
+
+    document.querySelectorAll('.track-more').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showToast('Track options');
+      });
+    });
+
+    const backdrop = document.getElementById('createModalBackdrop');
+    const nameInput = document.getElementById('collectionName');
+    const descInput = document.getElementById('collectionDesc');
+    let selectedVisibility = 'private';
+
+    function openModal() {
+      backdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => nameInput.focus(), 250);
+    }
+    function closeModal() {
+      backdrop.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    document.getElementById('coverPicker').addEventListener('click', () => {
+      showToast('Cover picker coming soon');
+    });
+
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && backdrop.classList.contains('show')) closeModal();
+    });
+
+    document.querySelectorAll('.visibility-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.visibility-option').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        selectedVisibility = opt.dataset.visibility;
+      });
+    });
+
+    document.getElementById('modalCreate').addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast('Give your collection a name');
+        nameInput.focus();
+        return;
+      }
+      showToast('Created “' + name + '” · ' + selectedVisibility);
+      nameInput.value = '';
+      descInput.value = '';
+      closeModal();
+    });
+
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Read: The Ashen Crown</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #e2e8f0;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --reading-text: #d1d5db;
+      --header-bg: rgba(11, 12, 16, 0.88);
+    }
+
+    /* Light Mode Overrides */
+    body.light-mode {
+      --bg-base: #f8f9fa;
+      --bg-surface: #ffffff;
+      --bg-surface-hover: #e9ecef;
+      --border-subtle: rgba(0, 0, 0, 0.05);
+      --border-active: rgba(0, 0, 0, 0.1);
+      --text-main: #1a1a1a;
+      --text-muted: #6c757d;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --reading-text: #2d3748;
+      --header-bg: rgba(255, 255, 255, 0.92);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Lora', serif; /* Using Lora for reading */
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      scroll-behavior: smooth;
+    }
+
+    /* READING PROGRESS BAR */
+    .progress-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: transparent;
+      z-index: 2000;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--accent), var(--accent-bright));
+      transition: width 0.1s ease;
+      box-shadow: 0 0 10px rgba(200, 16, 46, 0.5);
+    }
+
+    /* READER HEADER */
+    .reader-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--header-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 1000;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    .reader-header.hidden {
+      transform: translateY(-100%);
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(128, 128, 128, 0.1);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .back-btn:hover {
+      background: rgba(128, 128, 128, 0.2);
+      border-color: var(--border-active);
+      color: var(--accent-bright);
+    }
+    .header-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-align: center;
+      flex: 1;
+      padding: 0 16px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      color: var(--text-main);
+      background: rgba(128, 128, 128, 0.15);
+    }
+
+    /* READING CONTENT */
+    .reading-wrapper {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 100px 32px 120px;
+    }
+    
+    .chapter-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .chapter-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-main);
+      margin-bottom: 40px;
+      letter-spacing: -0.5px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+    .chapter-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 60px; height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .reading-content {
+      font-size: 18px;
+      line-height: 1.85;
+      color: var(--reading-text);
+      letter-spacing: 0.2px;
+      transition: color 0.3s ease;
+    }
+    
+    .reading-content p {
+      margin-bottom: 1.6em;
+      text-align: justify;
+      hyphens: auto;
+    }
+    
+    /* Drop Cap */
+    .reading-content p:first-of-type::first-letter {
+      float: left;
+      font-size: 72px;
+      line-height: 0.85;
+      padding-top: 6px;
+      padding-right: 12px;
+      padding-left: 2px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+    }
+
+    .reading-content p:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Divider */
+    .reading-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 48px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+      opacity: 0.4;
+    }
+    .reading-divider::before,
+    .reading-divider::after {
+      content: '';
+      height: 1px;
+      background: var(--border-active);
+      flex: 1;
+    }
+
+    /* CHAPTER NAVIGATION */
+    .chapter-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: 50px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      flex: 1;
+      justify-content: center;
+    }
+    .nav-btn:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+    }
+    .nav-btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .nav-btn.primary:hover {
+      background: var(--accent-bright);
+      border-color: var(--accent-bright);
+      box-shadow: 0 8px 24px rgba(200, 16, 46, 0.3);
+    }
+    .nav-btn.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .nav-btn i { font-size: 12px; }
+
+    /* FLOATING BACK TO TOP */
+    .back-to-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-active);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.22, 0.7, 0.4, 1);
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .back-to-top.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      transform: translateY(-4px);
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      left: 50%; bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid rgba(200, 16, 46, 0.38);
+      color: #ffffff;
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px; font-weight: 500;
+      padding: 10px 20px; border-radius: 999px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      z-index: 4000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 24px rgba(200, 16, 46, 0.28);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .reader-header { padding: 0 16px; height: 56px; }
+      .header-title { font-size: 12px; }
+      .reading-wrapper { padding: 84px 20px 100px; }
+      .chapter-title { font-size: 24px; margin-bottom: 32px; }
+      .reading-content { font-size: 16px; line-height: 1.8; }
+      .reading-content p:first-of-type::first-letter { font-size: 54px; padding-top: 4px; padding-right: 8px; }
+      .chapter-nav { flex-direction: column; gap: 10px; margin-top: 48px; }
+      .nav-btn { width: 100%; padding: 12px 20px; font-size: 12px; }
+      .back-to-top { bottom: 80px; right: 20px; width: 42px; height: 42px; }
+      .toast { bottom: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="reader-header" id="readerHeader">
+    <a href="#" class="back-btn" id="backBtn" onclick="event.preventDefault(); history.back();">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="header-title">Chapter 1 · The Bastard Daughter</div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="showToast('Reading settings opened')">
+        <i class="fa-solid fa-font"></i>
+      </button>
+      <!-- CHANGED: Save button is now the Theme Toggle -->
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- READING AREA -->
+  <main class="reading-wrapper">
+    
+    <span class="chapter-label">Chapter One</span>
+    <h1 class="chapter-title">The Bastard Daughter</h1>
+
+    <article class="reading-content">
+      <p>
+        The ash fell like snow over the ruined capital of Vael. It had been three days since the last emperor's pyre had burned itself out, and the city still smelled of smoke and old blood. Elara Vane pulled the hood of her cloak tighter, obscuring her face from the patrolling guards who moved through the streets with the rigid precision of men who had something to prove.
+      </p>
+      <p>
+        She kept to the shadows, her boots silent on the cobblestones. She had learned long ago that survival was not about strength or speed. It was about being forgettable. It was about being the kind of person whose face no one bothered to remember.
+      </p>
+      <p>
+        The tavern at the end of the alley was called The Broken Crown. The irony was not lost on her. She pushed open the heavy wooden door and stepped inside, letting the warmth of the hearth wash over her. The room was sparse, filled with the dregs of a fallen kingdom—mercenaries, merchants, and the occasional noble who had fallen far enough to drink alongside them.
+      </p>
+      <p>
+        She took a seat in the farthest corner, her back to the wall, and ordered a cup of watered wine. She didn't drink it. She just held it, watching the door, waiting.
+      </p>
+
+      <div class="reading-divider">
+        <i class="fa-solid fa-feather"></i>
+      </div>
+
+      <p>
+        He arrived just as the bell tower struck midnight. He was tall, cloaked in gray, with the kind of face that had seen too many winters and not enough mercy. He didn't look like a priest. He looked like a soldier who had traded his sword for a scripture.
+      </p>
+      <p>
+        He sat down across from her without asking permission. "You're hard to find, Elara Vane."
+      </p>
+      <p>
+        She didn't flinch. She had expected this. She had prepared for this. "And you're not hard to spot, Ash-priest. You smell like a funeral."
+      </p>
+      <p>
+        A ghost of a smile touched his lips. "A funeral I intend to prevent. The Ashborn Order knows who you are. They know what you carry in your blood. They will not stop until you are dead, or until you take what is rightfully yours."
+      </p>
+      <p>
+        Elara set her cup down. The wine rippled. "I don't want a crown."
+      </p>
+      <p>
+        "It doesn't matter what you want," he said quietly. "The crown is a debt. And you, my lady, are already in arrears."
+      </p>
+    </article>
+
+    <!-- NAVIGATION -->
+    <div class="chapter-nav">
+      <a href="#" class="nav-btn disabled">
+        <i class="fa-solid fa-chevron-left"></i> Previous
+      </a>
+      <a href="#" class="nav-btn primary" onclick="event.preventDefault(); showToast('Loading Chapter 2...');">
+        Next Chapter <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- BACK TO TOP BUTTON -->
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // READING PROGRESS & HEADER HIDE ON SCROLL
+    const progressBar = document.getElementById('progressBar');
+    const readerHeader = document.getElementById('readerHeader');
+    const backToTop = document.getElementById('backToTop');
+    let lastScrollTop = 0;
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      
+      // Update progress bar
+      if (docHeight > 0) {
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        progressBar.style.width = scrollPercent + '%';
+      }
+
+      // Show/hide header based on scroll direction
+      if (scrollTop > lastScrollTop && scrollTop > 100) {
+        readerHeader.classList.add('hidden');
+      } else {
+        readerHeader.classList.remove('hidden');
+      }
+      lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+
+      // Show/hide back to top button
+      if (scrollTop > 400) {
+        backToTop.classList.add('show');
+      } else {
+        backToTop.classList.remove('show');
+      }
+    }, { passive: true });
+
+    // TOAST
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+    }
+
+    // Handle Next/Previous (Placeholder)
+    document.querySelector('.nav-btn.disabled').addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('You are at the beginning of the book');
+    });
+
+    // THEME TOGGLE LOGIC
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.getElementById('themeIcon');
+      if (document.body.classList.contains('light-mode')) {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        showToast('Light mode activated');
+      } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        showToast('Dark mode activated');
+      }
+    }
+  </script>
+</body>
+</html>

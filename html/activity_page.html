@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Chronicle</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --up: #22C55E;
+      --gold: #F4B942;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+      --content-px: 48px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main); font-weight: 700; font-size: 20px;
+      letter-spacing: 3px; cursor: pointer;
+    }
+    .logo span { color: var(--accent); }
+
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      position: relative; transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 60%; border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0); transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main); background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 14px; cursor: pointer; text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      text-align: center; width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ========== MOBILE HEADER ========== */
+    .mobile-header {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between; align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; color: var(--text-main);
+      font-size: 16px; cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 950;
+    }
+
+    /* ========== MOBILE BOTTOM NAV ========== */
+    .mobile-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around; align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 10px; gap: 4px;
+      flex: 1; height: 100%;
+      position: relative; transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: ''; position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* ========== MAIN WRAPPER ========== */
+    .main-content-wrapper {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 var(--content-px);
+      max-width: 680px; width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ========== PAGE HEADER ========== */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      padding: 48px 0 20px;
+      margin-bottom: 16px;
+      position: relative;
+      flex-wrap: wrap;
+      animation: heroEnter 0.8s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200,16,46,0.35), rgba(200,16,46,0) 40%);
+    }
+    .page-kicker {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .page-kicker .red-bar {
+      width: 3px; height: 12px;
+      background-color: var(--accent);
+      border-radius: 1px;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 500px;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    /* ========== FEED TABS ========== */
+    .feed-tabs {
+      display: flex; gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-bottom: 24px;
+      scrollbar-width: none;
+    }
+    .feed-tabs::-webkit-scrollbar { display: none; }
+    .feed-tab {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px; font-weight: 600;
+      padding: 8px 20px; border-radius: 999px;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .feed-tab:hover { color: var(--text-main); border-color: var(--border-active); }
+    .feed-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(200, 16, 46, 0.25);
+    }
+
+    /* ========== POST CARD ========== */
+    .post-card {
+      background: transparent;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 28px 0;
+      animation: cardEnter 0.5s cubic-bezier(0.22, 0.7, 0.4, 1) backwards;
+    }
+    .post-card:last-child {
+      border-bottom: none;
+    }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .post-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #000;
+    }
+    .post-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .post-meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .post-author-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .post-author-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .post-author-handle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .post-verified {
+      color: var(--accent-bright);
+      font-size: 12px;
+    }
+    .post-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .post-context {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .post-context i { font-size: 10px; color: var(--accent); }
+
+    .post-more {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .post-more:hover { color: var(--text-main); }
+
+    .post-body {
+      padding-left: 56px;
+      margin-bottom: 16px;
+    }
+    .post-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #d1d5db;
+      white-space: pre-wrap;
+    }
+    
+    /* ===== ELEGANT HIGHLIGHTED MENTIONS ===== */
+    .mention {
+      display: inline;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      border-bottom: 1.5px solid currentColor; /* Permanent underline */
+    }
+    .mention:hover {
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    }
+    .mention.book { color: #60A5FA; }
+    .mention.book:hover { text-shadow: 0 0 12px rgba(96, 165, 250, 0.5); }
+    .mention.author { color: #4ADE80; }
+    .mention.author:hover { text-shadow: 0 0 12px rgba(74, 222, 128, 0.5); }
+    .mention.event { color: #FBBF24; }
+    .mention.event:hover { text-shadow: 0 0 12px rgba(251, 191, 36, 0.5); }
+
+    /* Media Attachment */
+    .post-media {
+      margin-left: 56px;
+      margin-bottom: 16px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #000;
+      max-height: 400px;
+    }
+    .post-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Post Actions */
+    .post-actions {
+      display: flex;
+      align-items: center;
+      padding-left: 56px;
+      margin-top: 8px;
+    }
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s, transform 0.2s;
+      padding: 4px 0;
+    }
+    .action-btn i { font-size: 16px; transition: transform 0.2s; }
+    .action-btn:hover { color: var(--text-main); }
+    .action-btn:hover i { transform: scale(1.15); }
+    
+    .action-btn.like:hover { color: #EF4444; }
+    .action-btn.like.active { color: #EF4444; }
+    .action-btn.like.active i { font-weight: 900; }
+    .action-btn.comment:hover { color: #3B82F6; }
+    .action-btn.share:hover { color: var(--accent-bright); }
+
+    /* ========== COMMENTS SECTION ========== */
+    .comments-section {
+      margin-left: 56px;
+      margin-top: 16px;
+      padding-left: 20px;
+      border-left: 2px solid rgba(255, 255, 255, 0.05);
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .comments-section.open { display: flex; }
+
+    /* Nested Replies Container */
+    .comment-replies {
+      margin-left: 42px;
+      margin-top: 16px;
+      padding-left: 16px;
+      border-left: 2px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 10px;
+    }
+    .comment-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .comment-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .comment-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .comment-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .comment-time {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .comment-text {
+      font-size: 12.5px;
+      color: #c4c5ca;
+      line-height: 1.5;
+    }
+    
+    /* Reply Button */
+    .comment-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .comment-reply-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0;
+    }
+    .comment-reply-btn:hover { color: var(--text-main); }
+
+    /* Replying To Banner */
+    .replying-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(200, 16, 46, 0.1);
+      border: 1px solid rgba(200, 16, 46, 0.3);
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: var(--text-main);
+    }
+    .replying-banner.visible { display: flex; }
+    .replying-banner span { color: var(--accent-bright); font-weight: 600; }
+    .replying-banner button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 2px;
+    }
+    .replying-banner button:hover { color: var(--text-main); }
+
+    .comment-input-wrap {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .comment-input {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 8px 16px;
+      color: var(--text-main);
+      font-size: 12.5px;
+      outline: none;
+      font-family: inherit;
+    }
+    .comment-input::placeholder { color: var(--text-muted); }
+    .comment-input:focus { border-color: rgba(200, 16, 46, 0.4); }
+    .comment-send {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    .comment-send:hover { background: var(--accent-bright); }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      :root { --content-px: 20px; }
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+      .page-header { padding: 32px 0 16px; }
+      .page-title { font-size: 26px; }
+      .post-body { padding-left: 0; margin-top: 8px; }
+      .post-media { margin-left: 0; }
+      .post-actions { padding-left: 0; }
+      .comments-section { margin-left: 0; padding-left: 0; border-left: none; }
+      .comment-replies { margin-left: 20px; padding-left: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .post-body { padding-left: 0; margin-top: 8px; }
+      .post-media { margin-left: 0; }
+      .post-actions { padding-left: 0; }
+      .comments-section { margin-left: 0; }
+      .action-group { gap: 20px; }
+      .action-btn span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-feather-pointed"></i> Authors</a>
+          <a href="#" class="active"><i class="fa-solid fa-chart-line"></i> Chronicle</a>
+          <a href="#"><i class="fa-solid fa-chart-line"></i> Box Office</a>
+          <a href="#"><i class="fa-solid fa-trophy"></i> Awards</a>
+          <a href="#"><i class="fa-regular fa-bell"></i> Notifications</a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> My Library</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div>
+            <div class="page-kicker">
+              <span class="red-bar"></span>
+              Community Feed
+            </div>
+            <h1 class="page-title">Chronicle</h1>
+            <p class="page-sub">Author updates, book announcements, and community highlights. Read what your favorite authors are sharing.</p>
+          </div>
+        </div>
+
+        <!-- FEED TABS -->
+        <div class="feed-tabs">
+          <button class="feed-tab active">For You</button>
+          <button class="feed-tab">Following</button>
+        </div>
+
+        <!-- FEED LIST -->
+        <div id="feedList">
+
+          <!-- POST 1: Author Update with Book Mention -->
+          <article class="post-card">
+            <div class="post-header">
+              <div class="post-avatar">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop" alt="Alex Bedi">
+              </div>
+              <div class="post-meta">
+                <div class="post-author-row">
+                  <span class="post-author-name">Alex Bedi</span>
+                  <i class="fa-solid fa-circle-check post-verified"></i>
+                  <span class="post-author-handle">@alexbedi</span>
+                  <span class="post-time">· 2h</span>
+                </div>
+                <div class="post-context">
+                  <i class="fa-solid fa-book-open"></i> Author of The Ashborn Saga
+                </div>
+              </div>
+              <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+            </div>
+
+            <div class="post-body">
+              <p class="post-text">The moment I've been waiting for has finally arrived. Chapter 15 of <span class="mention book" onclick="navigateTo('book')">The Ashen Crown</span> is now live! 
+
+I know you've all been waiting to see what happens after that cliffhanger in Chapter 14. Let's just say... Elara makes a choice that will change everything.
+
+Special thanks to <span class="mention author" onclick="navigateTo('author')">@madelinemiller</span> for inspiring me to push through the dark middle chapters. 💀</p>
+            </div>
+
+            <div class="post-actions">
+              <div class="action-group">
+                <button class="action-btn like" onclick="toggleLike(this)"><i class="fa-regular fa-heart"></i><span>1.2K</span></button>
+                <button class="action-btn comment" onclick="toggleComments(this)"><i class="fa-regular fa-comment"></i><span>84</span></button>
+                <button class="action-btn share"><i class="fa-solid fa-share-nodes"></i></button>
+              </div>
+            </div>
+
+            <!-- COMMENTS SECTION -->
+            <div class="comments-section">
+              
+              <!-- Parent Comment -->
+              <div class="comment-item" id="comment-1">
+                <div class="comment-avatar">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop" alt="">
+                </div>
+                <div class="comment-content">
+                  <div class="comment-head">
+                    <span class="comment-name">@seravoss</span>
+                    <span class="comment-time">1h ago</span>
+                  </div>
+                  <p class="comment-text">Finally! I've been refreshing my app all morning. That Chapter 14 ending was brutal.</p>
+                  
+                  <div class="comment-actions">
+                    <button class="comment-reply-btn" onclick="setReplyContext('@seravoss', 'comment-1')">Reply</button>
+                  </div>
+
+                  <!-- Nested Replies Container for this comment -->
+                  <div class="comment-replies" id="replies-comment-1">
+                    <!-- This is where nested replies will be injected -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Area for Comments -->
+              <div class="comment-input-area">
+                <div class="replying-banner" id="replyingBanner">
+                  <span>Replying to <strong id="replyTargetName">@username</strong></span>
+                  <button onclick="cancelReply()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="comment-input-wrap">
+                  <input type="text" class="comment-input" id="commentInput" placeholder="Write a comment...">
+                  <button class="comment-send" onclick="submitComment()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+              </div>
+
+            </div>
+          </article>
+
+          <!-- POST 2: Meme/Image Post -->
+          <article class="post-card">
+            <div class="post-header">
+              <div class="post-avatar">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" alt="Sera Voss">
+              </div>
+              <div class="post-meta">
+                <div class="post-author-row">
+                  <span class="post-author-name">Sera Voss</span>
+                  <i class="fa-solid fa-circle-check post-verified"></i>
+                  <span class="post-author-handle">@seravoss</span>
+                  <span class="post-time">· 5h</span>
+                </div>
+                <div class="post-context">
+                  <i class="fa-solid fa-feather-pointed"></i> Author of Blood of Kings
+                </div>
+              </div>
+              <button class="post-more"><i class="fa-solid fa-ellipsis"></i></button>
+            </div>
+
+            <div class="post-body">
+              <p class="post-text">Me: "I'll just write one more chapter before bed."
+
+Also me at 4am: *writing an entire new plot twist involving <span class="mention book" onclick="navigateTo('book')">Blood of Kings</span> and a secret society of librarians* 
+
+Send help. ☕️📚</p>
+            </div>
+
+            <div class="post-media">
+              <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800&auto=format&fit=crop" alt="Writing meme">
+            </div>
+
+            <div class="post-actions">
+              <div class="action-group">
+                <button class="action-btn like" onclick="toggleLike(this)"><i class="fa-regular fa-heart"></i><span>3.4K</span></button>
+                <button class="action-btn comment" onclick="toggleComments(this)"><i class="fa-regular fa-comment"></i><span>156</span></button>
+                <button class="action-btn share"><i class="fa-solid fa-share-nodes"></i></button>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Chronicle</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    /* ========== INTERACTIONS ========== */
+
+    // Like Toggle
+    function toggleLike(btn) {
+      btn.classList.toggle('active');
+      const icon = btn.querySelector('i');
+      const countEl = btn.querySelector('span');
+      if (btn.classList.contains('active')) {
+        icon.classList.remove('fa-regular');
+        icon.classList.add('fa-solid');
+        countEl.textContent = (parseInt(countEl.textContent) || 0) + 1;
+      } else {
+        icon.classList.remove('fa-solid');
+        icon.classList.add('fa-regular');
+        countEl.textContent = Math.max(0, (parseInt(countEl.textContent) || 0) - 1);
+      }
+    }
+
+    // Comments Toggle
+    function toggleComments(btn) {
+      const postCard = btn.closest('.post-card');
+      const commentsSection = postCard.querySelector('.comments-section');
+      if (commentsSection) {
+        commentsSection.classList.toggle('open');
+      }
+    }
+
+    // Navigation for Mentions
+    function navigateTo(type) {
+      if (type === 'book') {
+        alert('Navigating to Book Page: The Ashen Crown');
+      } else if (type === 'author') {
+        alert('Navigating to Author Profile: @madelinemiller');
+      } else if (type === 'event') {
+        alert('Navigating to Event Page: Novelix Book Festival 2026');
+      }
+    }
+
+    /* ========== THREADED REPLIES LOGIC ========== */
+    let currentReplyTarget = null;
+    let currentReplyContext = null;
+
+    function setReplyContext(username, commentId) {
+      currentReplyTarget = username;
+      currentReplyContext = commentId;
+
+      const banner = document.getElementById('replyingBanner');
+      const input = document.getElementById('commentInput');
+      const replyName = document.getElementById('replyTargetName');
+
+      replyName.textContent = username;
+      banner.classList.add('visible');
+      input.placeholder = `Reply to ${username}...`;
+      input.focus();
+    }
+
+    function cancelReply() {
+      currentReplyTarget = null;
+      currentReplyContext = null;
+      
+      const banner = document.getElementById('replyingBanner');
+      const input = document.getElementById('commentInput');
+      
+      banner.classList.remove('visible');
+      input.placeholder = 'Write a comment...';
+      input.value = '';
+    }
+
+    function submitComment() {
+      const input = document.getElementById('commentInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Create the new comment element
+      const newCommentHTML = `
+        <div class="comment-item">
+          <div class="comment-avatar">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop" alt="You">
+          </div>
+          <div class="comment-content">
+            <div class="comment-head">
+              <span class="comment-name">Alex Bedi</span>
+              <span class="comment-time">Just now</span>
+            </div>
+            <p class="comment-text">${text}</p>
+          </div>
+        </div>
+      `;
+
+      if (currentReplyTarget && currentReplyContext) {
+        // Insert as a nested reply
+        const parentContainer = document.getElementById(`replies-${currentReplyContext}`);
+        if (parentContainer) {
+          parentContainer.insertAdjacentHTML('beforeend', newCommentHTML);
+          // Update placeholder text to explicitly mention the user
+          const parentComment = document.getElementById(currentReplyContext);
+          const replyText = parentContainer.lastElementChild.querySelector('.comment-text');
+          if (replyText) {
+            replyText.innerHTML = `<strong style="color:var(--accent-bright);">${currentReplyTarget}</strong> ${text}`;
+          }
+        }
+        cancelReply(); // Reset the reply state
+      } else {
+        // Insert as a top-level comment
+        const commentsSection = document.querySelector('.comments-section');
+        const inputArea = commentsSection.querySelector('.comment-input-area');
+        // Insert before the input area
+        inputArea.insertAdjacentHTML('beforebegin', newCommentHTML);
+      }
+
+      input.value = '';
+    }
+
+    /* ========== SIDEBAR ========== */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

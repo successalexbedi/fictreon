@@ -1,0 +1,60 @@
+[package]
+name = "fic_readers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+
+# UI
+chain_ui_core.workspace = true
+chain_ui_unpoly.workspace = true
+chain_ui_macros.workspace = true
+
+# WEB
+axum.workspace = true
+tokio.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+http.workspace = true
+http-body-util.workspace = true
+
+# SERIALIZATION
+serde.workspace = true
+serde_json.workspace = true
+
+# DATABASE
+sqlx.workspace = true
+
+# AUTHENTICATION / SECURITY
+bcrypt.workspace = true
+uuid.workspace = true
+
+# DATES / TIME
+chrono.workspace = true
+
+# CONFIGURATION
+dotenvy.workspace = true
+
+# LOGGING / TRACING
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# COOKIES / HTTP SESSIONS
+cookie.workspace = true
+
+# FORMS / URL ENCODING
+form_urlencoded.workspace = true
+urlencoding.workspace = true
+
+# ERRORS
+thiserror.workspace = true
+anyhow.workspace = true
+
+# ASYNC UTILITIES
+futures.workspace = true
+
+# STATIC ASSETS / MIME DETECTION
+mime_guess.workspace = true
+
+# INTERNAL CRATES

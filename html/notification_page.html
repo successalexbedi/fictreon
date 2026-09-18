@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Notifications</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-bright: #E63946;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+      --content-px: 48px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed; top: 0; left: 0;
+      height: 100vh; z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main); font-weight: 700; font-size: 20px;
+      letter-spacing: 3px; cursor: pointer;
+    }
+    .logo span { color: var(--accent); }
+
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex; align-items: center; gap: 14px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 500;
+      padding: 10px 14px; border-radius: var(--radius-sm);
+      position: relative; transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 3px; height: 60%; border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0); transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main); background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+    
+    .nav-badge {
+      display: none;
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      justify-content: center;
+    }
+    .side-nav-links a.active .nav-badge { display: inline-flex; }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 14px; cursor: pointer; text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main); color: var(--bg-base);
+      border: none; padding: 10px; border-radius: 20px;
+      font-weight: 600; font-size: 13px; cursor: pointer;
+      text-align: center; width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ========== MOBILE HEADER ========== */
+    .mobile-header {
+      display: none; position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between; align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; color: var(--text-main);
+      font-size: 16px; cursor: pointer;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6); z-index: 950;
+    }
+
+    /* ========== MOBILE BOTTOM NAV ========== */
+    .mobile-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around; align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 10px; gap: 4px;
+      flex: 1; height: 100%;
+      position: relative; transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: ''; position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* ========== MAIN WRAPPER ========== */
+    .main-content-wrapper {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 var(--content-px);
+      max-width: 700px; width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ========== PAGE HEADER ========== */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 48px 0 16px;
+      margin-bottom: 8px;
+      animation: heroEnter 0.8s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .header-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+    }
+    .unread-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(200, 16, 46, 0.4);
+    }
+
+    .btn-mark-read {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-mark-read:hover { color: var(--text-main); }
+    .btn-mark-read i { font-size: 11px; }
+
+    /* ========== NOTIFICATION GROUPS ========== */
+    .notif-group {
+      margin-bottom: 32px;
+    }
+    .notif-group-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+
+    /* ========== NOTIFICATION ITEM (Matches Reference Image) ========== */
+    .notif-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: var(--radius-sm);
+    }
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+    .notif-item:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* The Icon Box */
+    .notif-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--bg-surface);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    /* Icon Colors */
+    .notif-icon-box.heart { color: #EF4444; }
+    .notif-icon-box.book { color: #3B82F6; }
+    .notif-icon-box.trophy { color: #F4B942; }
+    .notif-icon-box.user { color: #22C55E; }
+    .notif-icon-box.system { color: #8a8b91; }
+
+    /* The Text Content */
+    .notif-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      padding-top: 2px;
+    }
+    .notif-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+    .notif-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .notif-time {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* The Unread Red Dot */
+    .notif-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 6px;
+      box-shadow: 0 0 10px rgba(200, 16, 46, 0.6);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 1024px) {
+      :root { --content-px: 20px; }
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+      .page-header { padding: 32px 0 12px; }
+      .page-title { font-size: 28px; }
+      .notif-item { padding: 14px 4px; gap: 14px; }
+      .notif-icon-box { width: 48px; height: 48px; border-radius: 14px; font-size: 18px; }
+      .notif-title { font-size: 13.5px; }
+      .notif-desc { font-size: 12px; }
+    }
+
+    @media (max-width: 480px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .btn-mark-read { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-feather-pointed"></i> Authors</a>
+          <a href="#"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+          <a href="#"><i class="fa-solid fa-chart-line"></i> Box Office</a>
+          <a href="#"><i class="fa-solid fa-trophy"></i> Awards</a>
+          <a href="#" class="active"><i class="fa-regular fa-bell"></i> Notifications <span class="nav-badge">2</span></a>
+          <a href="#"><i class="fa-solid fa-bookmark"></i> My Library</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div class="header-title-wrap">
+            <h1 class="page-title">Notifications</h1>
+            <div class="unread-badge" id="unreadBadge">2</div>
+          </div>
+          <button class="btn-mark-read" id="markAllRead">
+            <i class="fa-solid fa-check-double"></i> Mark all as read
+          </button>
+        </div>
+
+        <!-- NOTIFICATION LIST -->
+        <div id="notificationsList">
+
+          <!-- TODAY -->
+          <div class="notif-group">
+            <div class="notif-group-title">Today</div>
+            
+            <div class="notif-item unread">
+              <div class="notif-icon-box heart">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">New Chapter Available</div>
+                <div class="notif-desc">The Ashen Crown · Chapter 15 "The Emperor's Ghost" is now live. Continue your reading journey.</div>
+                <div class="notif-time">2 hours ago</div>
+              </div>
+              <div class="notif-dot"></div>
+            </div>
+
+            <div class="notif-item unread">
+              <div class="notif-icon-box user">
+                <i class="fa-solid fa-user-plus"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">New Follower</div>
+                <div class="notif-desc">@seravoss started following you. Check out their profile to see what they're reading.</div>
+                <div class="notif-time">5 hours ago</div>
+              </div>
+              <div class="notif-dot"></div>
+            </div>
+          </div>
+
+          <!-- THIS WEEK -->
+          <div class="notif-group">
+            <div class="notif-group-title">This Week</div>
+
+            <div class="notif-item">
+              <div class="notif-icon-box trophy">
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">Achievement Unlocked: Bookworm</div>
+                <div class="notif-desc">You've read 50 books on Novelix! Keep up the fantastic reading streak.</div>
+                <div class="notif-time">2 days ago</div>
+              </div>
+            </div>
+
+            <div class="notif-item">
+              <div class="notif-icon-box system">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">New Recommendation for You</div>
+                <div class="notif-desc">Based on your love for The Ashen Crown, we think you'll enjoy Blood of Kings by Sera Voss.</div>
+                <div class="notif-time">3 days ago</div>
+              </div>
+            </div>
+
+            <div class="notif-item">
+              <div class="notif-icon-box book">
+                <i class="fa-solid fa-comment"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">New Reply</div>
+                <div class="notif-desc">@nkreyes replied to your review on Project Hail Mary.</div>
+                <div class="notif-time">4 days ago</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- EARLIER -->
+          <div class="notif-group">
+            <div class="notif-group-title">Earlier</div>
+
+            <div class="notif-item">
+              <div class="notif-icon-box system">
+                <i class="fa-solid fa-circle-info"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">App Update Available</div>
+                <div class="notif-desc">Version 2.4 introduces dark mode improvements and a faster search engine.</div>
+                <div class="notif-time">1 week ago</div>
+              </div>
+            </div>
+
+            <div class="notif-item">
+              <div class="notif-icon-box heart">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <div class="notif-text">
+                <div class="notif-title">Comment Liked</div>
+                <div class="notif-desc">@mcross liked your comment: "The political maneuvering in this book is unmatched."</div>
+                <div class="notif-time">1 week ago</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-regular fa-bell"></i>
+      <span>Notifications</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    const markAllReadBtn = document.getElementById('markAllRead');
+    const unreadBadge = document.getElementById('unreadBadge');
+    const unreadItems = document.querySelectorAll('.notif-item.unread');
+    const notifDots = document.querySelectorAll('.notif-dot');
+
+    /* MARK ALL AS READ */
+    markAllReadBtn.addEventListener('click', () => {
+      // Remove unread class and dots
+      document.querySelectorAll('.notif-item').forEach(item => {
+        item.classList.remove('unread');
+      });
+      document.querySelectorAll('.notif-dot').forEach(dot => {
+        dot.style.display = 'none';
+      });
+      
+      // Update badge count
+      unreadBadge.style.display = 'none';
+      
+      // Update sidebar badge
+      const navBadge = document.querySelector('.nav-badge');
+      if (navBadge) navBadge.style.display = 'none';
+    });
+
+    /* CLICK TO MARK AS READ */
+    document.querySelectorAll('.notif-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (item.classList.contains('unread')) {
+          item.classList.remove('unread');
+          const dot = item.querySelector('.notif-dot');
+          if (dot) dot.style.display = 'none';
+          
+          // Update badge count
+          const currentCount = document.querySelectorAll('.notif-item.unread').length;
+          if (currentCount > 0) {
+            unreadBadge.textContent = currentCount;
+            const navBadge = document.querySelector('.nav-badge');
+            if (navBadge) navBadge.textContent = currentCount;
+          } else {
+            unreadBadge.style.display = 'none';
+            const navBadge = document.querySelector('.nav-badge');
+            if (navBadge) navBadge.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    /* SIDEBAR */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

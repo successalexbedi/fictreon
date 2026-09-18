@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Novelix - Collections</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #0b0c10;
+      --bg-surface: #14151a;
+      --bg-surface-hover: #1b1c24;
+      --border-subtle: rgba(255, 255, 255, 0.02);
+      --border-active: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: #8a8b91;
+      --accent: #C8102E;
+      --accent-deep: #8B0A1F;
+      --accent-bright: #E63946;
+      --accent-light: #FF8A80;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --sidebar-w: 260px;
+      --mobile-header-h: 64px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    html, body {
+      width: 100%;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container { display: flex; min-height: 100vh; width: 100%; position: relative; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 24px;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 1000;
+      transition: transform 0.3s ease, left 0.3s ease;
+    }
+    .sidebar-top { display: flex; flex-direction: column; gap: 40px; }
+    .logo {
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 3px;
+      cursor: pointer;
+    }
+    .logo span {
+      color: var(--accent);
+      display: inline-block;
+      animation: logoPulse 4.5s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { text-shadow: 0 0 0 rgba(200, 16, 46, 0); }
+      50%      { text-shadow: 0 0 20px rgba(200, 16, 46, 0.7); }
+    }
+    .side-nav-links { display: flex; flex-direction: column; gap: 8px; }
+    .side-nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .side-nav-links a i {
+      font-size: 15px; width: 18px;
+      transition: transform 0.25s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .side-nav-links a::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      width: 3px; height: 60%;
+      border-radius: 2px;
+      background: var(--accent);
+      transform: translateY(-50%) scaleY(0);
+      transform-origin: center;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .side-nav-links a:hover { color: var(--text-main); background-color: rgba(255, 255, 255, 0.03); }
+    .side-nav-links a:hover i { transform: translateX(2px); }
+    .side-nav-links a:hover::before,
+    .side-nav-links a.active::before { transform: translateY(-50%) scaleY(1); }
+    .side-nav-links a.active {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.04);
+      font-weight: 600;
+    }
+
+    .sidebar-bottom { display: flex; flex-direction: column; gap: 20px; }
+    .side-actions { display: flex; flex-direction: column; gap: 6px; }
+    .side-action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 14px;
+      cursor: pointer;
+      text-align: left;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s;
+    }
+    .side-action-btn:hover { background: rgba(255, 255, 255, 0.03); color: var(--text-main); }
+    .btn-login {
+      background-color: var(--text-main);
+      color: var(--bg-base);
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* MOBILE HEADER */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--mobile-header-h);
+      padding: 0 20px;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(20, 21, 26, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 900;
+    }
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px; height: 38px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      color: var(--text-main);
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .menu-toggle:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--border-active); }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 950;
+    }
+
+    /* MOBILE BOTTOM NAV */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      z-index: 1000;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mobile-bottom-nav .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      gap: 4px;
+      flex: 1; height: 100%;
+      position: relative;
+      transition: color 0.25s;
+    }
+    .mobile-bottom-nav .nav-item i {
+      font-size: 18px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      width: 20px; height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transform: translateX(-50%) scaleX(0);
+      transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .mobile-bottom-nav .nav-item.active::after { transform: translateX(-50%) scaleX(1); }
+    .mobile-bottom-nav .nav-item.active,
+    .mobile-bottom-nav .nav-item:hover { color: var(--text-main); }
+    .mobile-bottom-nav .nav-item.active i { transform: scale(1.12); }
+
+    /* MAIN WRAPPER */
+    .main-content-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      margin-left: var(--sidebar-w);
+      transition: margin 0.3s ease;
+    }
+    .content-inner {
+      padding: 0 48px;
+      max-width: 100%;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      padding: 48px 0 28px;
+      margin-bottom: 32px;
+      position: relative;
+      flex-wrap: wrap;
+      animation: heroEnter 0.8s cubic-bezier(0.22, 0.7, 0.4, 1) 0.1s backwards;
+    }
+    @keyframes heroEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200,16,46,0.35), rgba(200,16,46,0) 40%);
+    }
+    .page-kicker {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .page-kicker .red-bar {
+      width: 3px; height: 12px;
+      background-color: var(--accent);
+      border-radius: 1px;
+      animation: redBarPulse 2.6s ease-in-out infinite;
+    }
+    @keyframes redBarPulse {
+      0%, 100% { opacity: 0.7; transform: scaleY(1); }
+      50%      { opacity: 1;   transform: scaleY(1.25); }
+    }
+    .page-title {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* SECTIONS */
+    .section-block { margin-bottom: 48px; }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-right: 48px;
+      position: relative;
+      gap: 16px;
+      flex-wrap: nowrap;
+    }
+    .section-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, rgba(200, 16, 46, 0.35), rgba(200, 16, 46, 0) 30%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1s cubic-bezier(0.22, 0.7, 0.4, 1);
+      pointer-events: none;
+    }
+    body.reveal-ready .section-block.in-view .section-header::after {
+      transform: scaleX(1);
+    }
+    .section-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      flex: 1;
+    }
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.2px;
+    }
+    .section-title i {
+      color: var(--text-muted);
+      font-size: 14px;
+      transition: color 0.6s ease, transform 0.6s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    body.reveal-ready .section-block.in-view .section-title i {
+      color: var(--accent);
+      transform: rotate(-8deg) scale(1.06);
+      animation: iconRest 1.2s cubic-bezier(0.22, 0.7, 0.4, 1) 0.35s forwards;
+    }
+    @keyframes iconRest {
+      to { color: var(--text-muted); transform: rotate(0) scale(1); }
+    }
+    .section-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 400;
+      padding-left: 24px;
+      letter-spacing: 0.1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-action {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .section-action:hover { color: var(--text-main); }
+    .section-action i { font-size: 10px; }
+
+    .section-action.primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 11.5px;
+      gap: 7px;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .section-action.primary:hover { background: #a50c24; color: #fff; }
+    .section-action.primary:active { transform: scale(0.97); }
+    .section-action.primary i { font-size: 11px; }
+
+    .hide-mobile { display: inline; }
+
+    /* CAROUSEL */
+    .carousel-track {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+    }
+    .carousel-track::-webkit-scrollbar { height: 3px; }
+    .carousel-track::-webkit-scrollbar-track { background: transparent; }
+    .carousel-track::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 2px;
+    }
+
+    /* SQUARE CARD */
+    .square-card {
+      background: transparent;
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      min-width: 170px;
+      width: 170px;
+      flex-shrink: 0;
+      touch-action: manipulation;
+      transition: transform 0.32s cubic-bezier(0.22, 0.7, 0.4, 1);
+      will-change: transform;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .square-img-box {
+      width: 170px;
+      height: 170px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      transition: border-color 0.25s, box-shadow 0.35s ease;
+    }
+
+    .square-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85);
+      transition: filter 0.25s, transform 0.6s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+
+    .square-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .square-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .square-meta i { font-size: 10px; }
+
+    .overlay-tag {
+      position: absolute;
+      top: 8px; left: 8px;
+      background: rgba(11, 12, 16, 0.88);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+      z-index: 2;
+    }
+    .overlay-tag i { color: var(--accent); font-size: 8px; }
+
+    .overlay-count {
+      position: absolute;
+      bottom: 8px; right: 8px;
+      background: rgba(11, 12, 16, 0.88);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.2px;
+      z-index: 2;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: rgba(11, 12, 16, 0.9);
+      z-index: 2;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+      transition: width 0.5s ease;
+    }
+
+    /* Create card */
+    .create-card .square-img-box {
+      background: transparent;
+      border: 1.5px dashed rgba(255, 255, 255, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .create-card:hover .square-img-box {
+      border-color: rgba(200, 16, 46, 0.55);
+      background: rgba(200, 16, 46, 0.04);
+    }
+    .create-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      transition: color 0.25s;
+    }
+    .create-card:hover .create-inner { color: var(--text-main); }
+    .create-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(200, 16, 46, 0.12);
+      border: 1px solid rgba(200, 16, 46, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-bright);
+      font-size: 18px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .create-card:hover .create-icon {
+      background: rgba(200, 16, 46, 0.2);
+      border-color: rgba(200, 16, 46, 0.7);
+    }
+    .create-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    /* EVENT CARD */
+    .event-card {
+      min-width: 260px;
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+      transition: transform 0.32s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .event-cover {
+      width: 260px;
+      height: 146px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      transition: border-color 0.25s, box-shadow 0.35s ease;
+    }
+    .event-cover img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.85);
+      transition: filter 0.25s, transform 0.6s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    .event-card:hover .event-cover {
+      border-color: rgba(200, 16, 46, 0.55);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(200, 16, 46, 0.22);
+    }
+    .event-card:hover .event-cover img {
+      filter: brightness(1);
+      transform: scale(1.04);
+    }
+
+    .event-date-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: rgba(11, 12, 16, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      padding: 5px 9px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 38px;
+      z-index: 2;
+    }
+    .event-day {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      font-feature-settings: 'tnum';
+    }
+    .event-month {
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+      margin-top: 2px;
+    }
+
+    .event-type-tag {
+      position: absolute;
+      bottom: 10px; right: 10px;
+      background: rgba(11, 12, 16, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 2;
+    }
+    .event-type-tag.live {
+      background: var(--accent);
+      border-color: var(--accent-bright);
+      color: #fff;
+    }
+    .event-type-tag.live .live-dot {
+      width: 5px; height: 5px;
+      background: #fff;
+      border-radius: 50%;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.85); }
+    }
+    .event-type-tag i { font-size: 8px; }
+
+    .event-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      width: 100%;
+      min-width: 0;
+    }
+    .event-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      letter-spacing: -0.1px;
+    }
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .event-meta i { font-size: 9.5px; }
+    .event-meta .dot {
+      width: 3px; height: 3px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* HOVER */
+    @media (hover: hover) and (pointer: fine) {
+      .square-card:hover { transform: translateY(-6px); }
+      .square-card:hover .square-img-box {
+        border-color: rgba(200, 16, 46, 0.55);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(200, 16, 46, 0.22);
+      }
+      .square-card:hover .square-img-box img {
+        filter: brightness(1);
+        transform: scale(1.07);
+      }
+      .event-card:hover { transform: translateY(-6px); }
+    }
+
+    /* SCROLL REVEAL */
+    body.reveal-ready .section-block:not(.in-view) {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    body.reveal-ready .section-block {
+      transition: opacity 0.75s ease, transform 0.8s cubic-bezier(0.22, 0.7, 0.4, 1);
+    }
+    body.reveal-ready .section-block.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    body.reveal-ready .section-block.in-view .carousel-track > * {
+      animation: cardEnter 0.55s cubic-bezier(0.22, 0.7, 0.4, 1) backwards;
+    }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(1) { animation-delay: 0.03s; }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(2) { animation-delay: 0.08s; }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(3) { animation-delay: 0.13s; }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(4) { animation-delay: 0.18s; }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(5) { animation-delay: 0.23s; }
+    body.reveal-ready .section-block.in-view .carousel-track > *:nth-child(6) { animation-delay: 0.28s; }
+
+    /* CARD INTERACTIONS */
+    .square-card,
+    .event-card,
+    .section-action,
+    .nav-item,
+    .side-nav-links a {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+    .square-card:active { transform: translateY(-3px) scale(0.985); }
+    .event-card:active { transform: translateY(-3px) scale(0.985); }
+    .square-card:focus-visible,
+    .event-card:focus-visible,
+    .section-action:focus-visible {
+      outline: 2px solid rgba(200, 16, 46, 0.85);
+      outline-offset: 3px;
+      border-radius: var(--radius-md);
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translate(-50%, 16px);
+      background: rgba(20, 21, 26, 0.96);
+      border: 1px solid rgba(200, 16, 46, 0.38);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      white-space: nowrap;
+      max-width: calc(100vw - 40px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 0 24px rgba(200, 16, 46, 0.28);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar { left: -280px; top: 0; height: 100vh; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.active { display: block; }
+
+      .mobile-header { display: flex; }
+      .mobile-bottom-nav { display: flex; }
+
+      .main-content-wrapper {
+        margin-left: 0 !important;
+        padding-top: var(--mobile-header-h);
+        margin-bottom: 60px;
+      }
+
+      .content-inner { padding-left: 20px; padding-right: 20px; }
+
+      .page-header { padding-top: 32px; }
+      .page-title { font-size: 34px; }
+
+      .section-header { padding-right: 0; }
+
+      .carousel-track::-webkit-scrollbar { display: none; }
+      .carousel-track { scrollbar-width: none; }
+
+      .toast { bottom: 78px; }
+    }
+
+    @media (max-width: 640px) {
+      .page-title { font-size: 30px; }
+      .page-sub { font-size: 12.5px; }
+      .page-header { margin-bottom: 24px; }
+
+      .hide-mobile { display: none; }
+
+      .section-block { margin-bottom: 40px; }
+      .section-title { font-size: 16px; }
+      .section-subtitle { display: none; }
+
+      .square-card { min-width: 148px; width: 148px; }
+      .square-img-box { width: 148px; height: 148px; }
+
+      .section-action.primary {
+        padding: 7px 12px;
+        font-size: 11px;
+        gap: 5px;
+      }
+      .section-action.primary i { font-size: 10px; }
+    }
+
+    @media (max-width: 380px) {
+      .square-card { min-width: 130px; width: 130px; }
+      .square-img-box { width: 130px; height: 130px; }
+      .event-card, .event-cover { min-width: 220px; width: 220px; }
+      .event-cover { height: 124px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div class="logo">NOVEL<span>IX</span></div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">NOVEL<span>IX</span></div>
+        <nav class="side-nav-links">
+          <a href="#"><i class="fa-solid fa-house"></i> Home</a>
+          <a href="#"><i class="fa-solid fa-book"></i> Books</a>
+          <a href="#"><i class="fa-solid fa-layer-group"></i> Series</a>
+          <a href="#"><i class="fa-solid fa-compass"></i> New &amp; Popular</a>
+          <a href="#" class="active"><i class="fa-solid fa-bookmark"></i> Collections</a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="side-actions">
+          <button class="side-action-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+          <button class="side-action-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+        </div>
+        <button class="btn-login">Log In</button>
+      </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+      <div class="content-inner">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+          <div>
+            <div class="page-kicker">
+              <span class="red-bar"></span>
+              Personal Library
+            </div>
+            <h1 class="page-title">Collections</h1>
+            <p class="page-sub">Everything you've saved — books, events, authors, and the collections you've created.</p>
+          </div>
+        </div>
+
+        <!-- =========================================================
+             CONTINUE READING
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-book-open-reader"></i> Continue Reading</h2>
+              <span class="section-subtitle">Pick up where you left off</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="The Ashen Crown" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-book-open"></i> Ch. 14</div>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+                <div class="progress-bar"><div class="progress-fill" style="width: 68%;"></div></div>
+              </div>
+              <div>
+                <div class="square-title">The Ashen Crown</div>
+                <div class="square-meta">68% · 42 min left</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Dune" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-book-open"></i> Ch. 08</div>
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="Dune">
+                <div class="progress-bar"><div class="progress-fill" style="width: 32%;"></div></div>
+              </div>
+              <div>
+                <div class="square-title">Dune</div>
+                <div class="square-meta">32% · 4h 12m left</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="The Midnight Library" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-book-open"></i> Ch. 22</div>
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="The Midnight Library">
+                <div class="progress-bar"><div class="progress-fill" style="width: 89%;"></div></div>
+              </div>
+              <div>
+                <div class="square-title">The Midnight Library</div>
+                <div class="square-meta">89% · 18 min left</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="The Silent Patient" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-book-open"></i> Ch. 05</div>
+                <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop" alt="The Silent Patient">
+                <div class="progress-bar"><div class="progress-fill" style="width: 21%;"></div></div>
+              </div>
+              <div>
+                <div class="square-title">The Silent Patient</div>
+                <div class="square-meta">21% · 3h 04m left</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Neuromancer" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-book-open"></i> Ch. 17</div>
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400&auto=format&fit=crop" alt="Neuromancer">
+                <div class="progress-bar"><div class="progress-fill" style="width: 74%;"></div></div>
+              </div>
+              <div>
+                <div class="square-title">Neuromancer</div>
+                <div class="square-meta">74% · 1h 12m left</div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             YOUR COLLECTIONS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-folder-open"></i> Your Collections</h2>
+              <span class="section-subtitle">5 collections you've created</span>
+            </div>
+            <button class="section-action primary" id="newCollectionTop">
+              <i class="fa-solid fa-plus"></i>
+              <span>New<span class="hide-mobile"> Collection</span></span>
+            </button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card create-card" data-action="create" tabindex="0">
+              <div class="square-img-box">
+                <div class="create-inner">
+                  <div class="create-icon"><i class="fa-solid fa-plus"></i></div>
+                  <span class="create-label">Start fresh</span>
+                </div>
+              </div>
+              <div>
+                <div class="square-title">Create New Collection</div>
+                <div class="square-meta">Books, events, authors</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Favorites of 2026" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-lock"></i> Private</div>
+                <div class="overlay-count">18 items</div>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="Favorites of 2026">
+              </div>
+              <div>
+                <div class="square-title">Favorites of 2026</div>
+                <div class="square-meta">Updated 2 days ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Epic Fantasy Reads" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-globe"></i> Public</div>
+                <div class="overlay-count">24 items</div>
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400&auto=format&fit=crop" alt="Epic Fantasy Reads">
+              </div>
+              <div>
+                <div class="square-title">Epic Fantasy Reads</div>
+                <div class="square-meta">Updated 6 days ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Winter Reading List" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-lock"></i> Private</div>
+                <div class="overlay-count">12 items</div>
+                <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=400&auto=format&fit=crop" alt="Winter Reading List">
+              </div>
+              <div>
+                <div class="square-title">Winter Reading List</div>
+                <div class="square-meta">Updated 1 week ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Sci-Fi Essentials" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-globe"></i> Public</div>
+                <div class="overlay-count">8 items</div>
+                <img src="https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?q=80&w=400&auto=format&fit=crop" alt="Sci-Fi Essentials">
+              </div>
+              <div>
+                <div class="square-title">Sci-Fi Essentials</div>
+                <div class="square-meta">Updated 2 weeks ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="To Read Next" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-lock"></i> Private</div>
+                <div class="overlay-count">6 items</div>
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="To Read Next">
+              </div>
+              <div>
+                <div class="square-title">To Read Next</div>
+                <div class="square-meta">Updated 3 weeks ago</div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SAVED COLLECTIONS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-bookmark"></i> Saved Collections</h2>
+              <span class="section-subtitle">Collections from the community you've saved</span>
+            </div>
+            <button class="section-action">Discover more <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="The Best of Dark Fantasy" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-user"></i> @seravoss</div>
+                <div class="overlay-count">42 items</div>
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="The Best of Dark Fantasy">
+              </div>
+              <div>
+                <div class="square-title">The Best of Dark Fantasy</div>
+                <div class="square-meta">Saved 3 days ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Modern Sci-Fi Starter Pack" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-user"></i> @alexbedi</div>
+                <div class="overlay-count">28 items</div>
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" alt="Modern Sci-Fi Starter Pack">
+              </div>
+              <div>
+                <div class="square-title">Modern Sci-Fi Starter Pack</div>
+                <div class="square-meta">Saved 1 week ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Writers Who Rewrote History" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-user"></i> @mcross</div>
+                <div class="overlay-count">19 items</div>
+                <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=400&auto=format&fit=crop" alt="Writers Who Rewrote History">
+              </div>
+              <div>
+                <div class="square-title">Writers Who Rewrote History</div>
+                <div class="square-meta">Saved 2 weeks ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Slow Burn Romances" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-user"></i> @lenamarsh</div>
+                <div class="overlay-count">34 items</div>
+                <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop" alt="Slow Burn Romances">
+              </div>
+              <div>
+                <div class="square-title">Slow Burn Romances</div>
+                <div class="square-meta">Saved 3 weeks ago</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Books That Broke Me" data-collection-type="collection" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-user"></i> @nkreyes</div>
+                <div class="overlay-count">16 items</div>
+                <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" alt="Books That Broke Me">
+              </div>
+              <div>
+                <div class="square-title">Books That Broke Me</div>
+                <div class="square-meta">Saved 1 month ago</div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SAVED BOOKS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-book"></i> Saved Books</h2>
+              <span class="section-subtitle">42 books in your library</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="The Ashen Crown" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Favorites</div>
+                <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=400&auto=format&fit=crop" alt="The Ashen Crown">
+              </div>
+              <div>
+                <div class="square-title">The Ashen Crown</div>
+                <div class="square-meta">Alex Bedi</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="The Last Saint" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Fantasy</div>
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" alt="The Last Saint">
+              </div>
+              <div>
+                <div class="square-title">The Last Saint</div>
+                <div class="square-meta">N. K. Reyes</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Blood of Kings" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Fantasy</div>
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=400&auto=format&fit=crop" alt="Blood of Kings">
+              </div>
+              <div>
+                <div class="square-title">Blood of Kings</div>
+                <div class="square-meta">Sera Voss</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="A Court of Embers" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> To Read</div>
+                <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=400&auto=format&fit=crop" alt="A Court of Embers">
+              </div>
+              <div>
+                <div class="square-title">A Court of Embers</div>
+                <div class="square-meta">Lena Marsh</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="The Hollow Vow" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Favorites</div>
+                <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=400&auto=format&fit=crop" alt="The Hollow Vow">
+              </div>
+              <div>
+                <div class="square-title">The Hollow Vow</div>
+                <div class="square-meta">Ilya Fenn</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Necromancer's Debt" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Winter</div>
+                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" alt="Necromancer's Debt">
+              </div>
+              <div>
+                <div class="square-title">Necromancer's Debt</div>
+                <div class="square-meta">Kai Tanaka</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Salt & Sorrow" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Winter</div>
+                <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=400&auto=format&fit=crop" alt="Salt & Sorrow">
+              </div>
+              <div>
+                <div class="square-title">Salt &amp; Sorrow</div>
+                <div class="square-meta">Marisol Vega</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Empire of Ash" data-collection-type="book" tabindex="0">
+              <div class="square-img-box">
+                <div class="overlay-tag"><i class="fa-solid fa-folder"></i> Sci-Fi</div>
+                <img src="https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?q=80&w=400&auto=format&fit=crop" alt="Empire of Ash">
+              </div>
+              <div>
+                <div class="square-title">Empire of Ash</div>
+                <div class="square-meta">D. C. Halloran</div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SAVED EVENTS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-calendar"></i> Saved Events</h2>
+              <span class="section-subtitle">8 upcoming events saved</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="event-card" data-title="The Ashen Crown Launch" tabindex="0">
+              <div class="event-cover">
+                <div class="event-date-badge">
+                  <span class="event-day">24</span>
+                  <span class="event-month">Nov</span>
+                </div>
+                <div class="event-type-tag live"><span class="live-dot"></span> LIVE</div>
+                <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=600&auto=format&fit=crop" alt="The Ashen Crown Launch">
+              </div>
+              <div class="event-info">
+                <div class="event-title">The Ashen Crown — Book Launch with Alex Bedi</div>
+                <div class="event-meta">
+                  <i class="fa-solid fa-video"></i> Virtual
+                  <span class="dot"></span>
+                  8:00 PM
+                </div>
+              </div>
+            </button>
+
+            <button class="event-card" data-title="Fantasy Writers Workshop" tabindex="0">
+              <div class="event-cover">
+                <div class="event-date-badge">
+                  <span class="event-day">02</span>
+                  <span class="event-month">Dec</span>
+                </div>
+                <div class="event-type-tag"><i class="fa-solid fa-ticket"></i> Ticketed</div>
+                <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=600&auto=format&fit=crop" alt="Fantasy Writers Workshop">
+              </div>
+              <div class="event-info">
+                <div class="event-title">Fantasy Writers Workshop — Worldbuilding</div>
+                <div class="event-meta">
+                  <i class="fa-solid fa-video"></i> Virtual
+                  <span class="dot"></span>
+                  6:30 PM
+                </div>
+              </div>
+            </button>
+
+            <button class="event-card" data-title="Year in Review Live" tabindex="0">
+              <div class="event-cover">
+                <div class="event-date-badge">
+                  <span class="event-day">15</span>
+                  <span class="event-month">Dec</span>
+                </div>
+                <div class="event-type-tag live"><span class="live-dot"></span> LIVE</div>
+                <img src="https://images.unsplash.com/photo-1478147427282-58a87a120781?q=80&w=600&auto=format&fit=crop" alt="Year in Review Live">
+              </div>
+              <div class="event-info">
+                <div class="event-title">Year in Review — Awards Preview</div>
+                <div class="event-meta">
+                  <i class="fa-solid fa-video"></i> Virtual
+                  <span class="dot"></span>
+                  9:00 PM
+                </div>
+              </div>
+            </button>
+
+            <button class="event-card" data-title="Reader Meetup London" tabindex="0">
+              <div class="event-cover">
+                <div class="event-date-badge">
+                  <span class="event-day">08</span>
+                  <span class="event-month">Jan</span>
+                </div>
+                <div class="event-type-tag"><i class="fa-solid fa-location-dot"></i> In-Person</div>
+                <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=600&auto=format&fit=crop" alt="Reader Meetup London">
+              </div>
+              <div class="event-info">
+                <div class="event-title">Fictreon Reader Meetup — London Chapter</div>
+                <div class="event-meta">
+                  <i class="fa-solid fa-location-dot"></i> London
+                  <span class="dot"></span>
+                  3:00 PM
+                </div>
+              </div>
+            </button>
+
+            <button class="event-card" data-title="Sera Voss AMA" tabindex="0">
+              <div class="event-cover">
+                <div class="event-date-badge">
+                  <span class="event-day">19</span>
+                  <span class="event-month">Jan</span>
+                </div>
+                <div class="event-type-tag"><i class="fa-solid fa-comments"></i> AMA</div>
+                <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=600&auto=format&fit=crop" alt="Sera Voss AMA">
+              </div>
+              <div class="event-info">
+                <div class="event-title">Ask an Author — Sera Voss AMA</div>
+                <div class="event-meta">
+                  <i class="fa-solid fa-video"></i> Virtual
+                  <span class="dot"></span>
+                  7:00 PM
+                </div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+        <!-- =========================================================
+             SAVED AUTHORS
+             ========================================================= -->
+        <section class="section-block">
+          <div class="section-header">
+            <div class="section-title-wrap">
+              <h2 class="section-title"><i class="fa-solid fa-feather-pointed"></i> Saved Authors</h2>
+              <span class="section-subtitle">12 authors followed</span>
+            </div>
+            <button class="section-action">See all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+
+          <div class="carousel-track">
+
+            <button class="square-card" data-title="Alex Bedi" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop" alt="Alex Bedi">
+              </div>
+              <div>
+                <div class="square-title">Alex Bedi</div>
+                <div class="square-meta">7 books · 3 series</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Sera Voss" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" alt="Sera Voss">
+              </div>
+              <div>
+                <div class="square-title">Sera Voss</div>
+                <div class="square-meta">5 books · 2 series</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Madeline Cross" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Madeline Cross">
+              </div>
+              <div>
+                <div class="square-title">Madeline Cross</div>
+                <div class="square-meta">4 books</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="N. K. Reyes" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" alt="N. K. Reyes">
+              </div>
+              <div>
+                <div class="square-title">N. K. Reyes</div>
+                <div class="square-meta">4 books</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Lena Marsh" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop" alt="Lena Marsh">
+              </div>
+              <div>
+                <div class="square-title">Lena Marsh</div>
+                <div class="square-meta">6 books</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Ilya Fenn" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop" alt="Ilya Fenn">
+              </div>
+              <div>
+                <div class="square-title">Ilya Fenn</div>
+                <div class="square-meta">3 books</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Kai Tanaka" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1507591064344-4c6ce005b128?q=80&w=400&auto=format&fit=crop" alt="Kai Tanaka">
+              </div>
+              <div>
+                <div class="square-title">Kai Tanaka</div>
+                <div class="square-meta">4 books</div>
+              </div>
+            </button>
+
+            <button class="square-card" data-title="Marisol Vega" data-collection-type="author" tabindex="0">
+              <div class="square-img-box">
+                <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=400&auto=format&fit=crop" alt="Marisol Vega">
+              </div>
+              <div>
+                <div class="square-title">Marisol Vega</div>
+                <div class="square-meta">3 books</div>
+              </div>
+            </button>
+
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-book"></i>
+      <span>Books</span>
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fa-solid fa-compass"></i>
+      <span>New</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    /* NEW COLLECTION */
+    function handleNewCollection() {
+      showToast('Opening new collection editor…');
+    }
+    document.getElementById('newCollectionTop').addEventListener('click', handleNewCollection);
+
+    /* ========== NAVIGATION HELPER ========== */
+    function openCollection(name) {
+      if (!name) return;
+      window.location.href = 'collection.html?name=' + encodeURIComponent(name);
+    }
+
+    /* ========== CLICKABLE CARDS ========== */
+    function bindClick(el, label, customHandler) {
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('click', () => {
+        if (customHandler) customHandler();
+        else showToast('Opening “' + label + '”');
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+      });
+    }
+
+    document.querySelectorAll('.square-card').forEach(card => {
+      const label = card.dataset.title || '';
+      const type = card.dataset.collectionType || 'collection';
+
+      // Create New Collection card
+      if (card.dataset.action === 'create') {
+        bindClick(card, 'Create', handleNewCollection);
+        return;
+      }
+
+      // Route to the appropriate detail page
+      bindClick(card, label, () => {
+        if (type === 'book') {
+          window.location.href = 'book.html?title=' + encodeURIComponent(label);
+        } else if (type === 'author') {
+          window.location.href = 'author.html?name=' + encodeURIComponent(label);
+        } else {
+          openCollection(label);
+        }
+      });
+    });
+
+    /* Event cards navigate to event pages */
+    document.querySelectorAll('.event-card').forEach(card => {
+      bindClick(card, card.dataset.title || '', () => {
+        window.location.href = 'event.html?title=' + encodeURIComponent(card.dataset.title || '');
+      });
+    });
+
+    /* MOBILE BOTTOM NAV */
+    document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+      });
+    });
+
+    /* SIDEBAR */
+    const menuToggle     = document.getElementById('menuToggle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024) {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+
+    /* SCROLL REVEAL */
+    (function initScrollReveal() {
+      const sections = document.querySelectorAll('.section-block');
+      if (!sections.length) return;
+      const viewportH = window.innerHeight || document.documentElement.clientHeight;
+      sections.forEach((s) => {
+        const rect = s.getBoundingClientRect();
+        if (rect.top < viewportH * 0.92) s.classList.add('in-view');
+      });
+      document.body.classList.add('reveal-ready');
+      if (!('IntersectionObserver' in window)) {
+        sections.forEach((s) => s.classList.add('in-view'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.06, rootMargin: '0px 0px -60px 0px' });
+      sections.forEach((s) => {
+        if (!s.classList.contains('in-view')) observer.observe(s);
+      });
+    })();
+  </script>
+</body>
+</html>
